@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+venv_old/
+.venv/
+env/
+keras_cache/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Databases and patient records
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+instance/
+
+# Uploaded patient images
+uploads/*
+!uploads/.gitkeep
+
+# Generated reports
+reports/*
+!reports/.gitkeep
+
+# Training datasets
+dataset/*
+!dataset/.gitkeep
+data/*
+!data/.gitkeep
+
+# Testing and cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db

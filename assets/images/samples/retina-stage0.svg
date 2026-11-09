@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <!-- Retinal Fundus Illumination Gradient -->
+    <radialGradient id="fundusBg0" cx="48%" cy="48%" r="52%">
+      <stop offset="0%" stop-color="#C24921" />
+      <stop offset="60%" stop-color="#8F250B" />
+      <stop offset="85%" stop-color="#551204" />
+      <stop offset="100%" stop-color="#0F0301" />
+    </radialGradient>
+    <!-- Optic Disc Radial Gradient -->
+    <radialGradient id="opticDisc0" cx="45%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#FFF8D6" />
+      <stop offset="45%" stop-color="#FFD175" />
+      <stop offset="85%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </radialGradient>
+    <!-- Macula / Fovea Gradient -->
+    <radialGradient id="maculaGrad0" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3D0B02" />
+      <stop offset="50%" stop-color="#6E1B08" />
+      <stop offset="100%" stop-color="#A22F11" stop-opacity="0" />
+    </radialGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Circular Aperture Mask -->
+  <clipPath id="circleClip0">
+    <circle cx="400" cy="400" r="380" />
+  </clipPath>
+
+  <g clip-path="url(#circleClip0)">
+    <!-- Base Fundus Tissue -->
+    <circle cx="400" cy="400" r="390" fill="url(#fundusBg0)" />
+
+    <!-- Subtle Choroidal Pattern -->
+    <path d="M 120 250 Q 240 280 340 230 T 600 300" stroke="#7A1D06" stroke-width="28" opacity="0.3" fill="none" filter="url(#softGlow)"/>
+    <path d="M 160 520 Q 300 480 480 540 T 700 460" stroke="#7A1D06" stroke-width="32" opacity="0.25" fill="none" filter="url(#softGlow)"/>
+
+    <!-- Macula Avascular Zone & Fovea Centralis -->
+    <circle cx="490" cy="405" r="75" fill="url(#maculaGrad0)" />
+    <circle cx="490" cy="405" r="14" fill="#360801" />
+    <!-- Foveal Light Reflex Tiny Dot -->
+    <circle cx="488" cy="403" r="2" fill="#FFE5D9" opacity="0.75" />
+
+    <!-- Optic Nerve Head (Optic Disc) -->
+    <g transform="translate(260, 400)">
+      <ellipse cx="0" cy="0" rx="44" ry="50" fill="url(#opticDisc0)" />
+      <!-- Physiological Cup -->
+      <ellipse cx="-4" cy="-2" rx="22" ry="26" fill="#FFFBEB" opacity="0.9" />
+    </g>
+
+    <!-- Superior & Inferior Retinal Vascular Arcades (Veins: darker/thicker, Arteries: brighter/thinner) -->
+    <!-- Superior Temporal Artery -->
+    <path d="M 264 380 Q 280 290 350 220 T 520 180 T 680 230" fill="none" stroke="#D13A1B" stroke-width="6.5" stroke-linecap="round"/>
+    <!-- Superior Temporal Vein -->
+    <path d="M 258 375 Q 295 270 380 205 T 560 170 T 710 240" fill="none" stroke="#8A1305" stroke-width="9.5" stroke-linecap="round"/>
+
+    <!-- Inferior Temporal Artery -->
+    <path d="M 266 422 Q 290 510 370 575 T 550 610 T 690 550" fill="none" stroke="#D13A1B" stroke-width="6" stroke-linecap="round"/>
+    <!-- Inferior Temporal Vein -->
+    <path d="M 260 428 Q 305 530 395 590 T 580 620 T 720 540" fill="none" stroke="#8A1305" stroke-width="9" stroke-linecap="round"/>
+
+    <!-- Nasal Artery & Vein -->
+    <path d="M 245 390 Q 180 340 100 360" fill="none" stroke="#D13A1B" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 242 408 Q 170 430 90 410" fill="none" stroke="#8A1305" stroke-width="7.5" stroke-linecap="round"/>
+
+    <!-- Fine Vessel Branches -->
+    <path d="M 350 220 Q 400 280 430 320" fill="none" stroke="#D13A1B" stroke-width="3" opacity="0.85"/>
+    <path d="M 520 180 Q 515 250 510 310" fill="none" stroke="#D13A1B" stroke-width="2.5" opacity="0.8"/>
+    <path d="M 370 575 Q 410 510 440 480" fill="none" stroke="#D13A1B" stroke-width="3" opacity="0.85"/>
+    <path d="M 550 610 Q 530 540 515 490" fill="none" stroke="#D13A1B" stroke-width="2.5" opacity="0.8"/>
+    <path d="M 600 200 Q 640 260 660 310" fill="none" stroke="#8A1305" stroke-width="3.5" opacity="0.8"/>
+    <path d="M 610 590 Q 645 530 670 470" fill="none" stroke="#8A1305" stroke-width="3.5" opacity="0.8"/>
+
+    <!-- Clinical Badge Overlay -->
+    <g transform="translate(40, 60)">
+      <rect width="210" height="42" rx="21" fill="rgba(16, 27, 53, 0.85)" stroke="#10B981" stroke-width="2"/>
+      <circle cx="24" cy="21" r="7" fill="#10B981"/>
+      <text x="42" y="26" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="800" fill="#FFFFFF">STAGE 0: NO DR</text>
+    </g>
+  </g>
+</svg>

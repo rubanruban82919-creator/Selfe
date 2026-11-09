@@ -1,0 +1,105 @@
+{
+    "version_name": "MobileNetV2-v1.0",
+    "architecture": "MobileNetV2 (Transfer Learning + Fine-Tuning)",
+    "weights_file": "dr_model.h5",
+    "trained_date": "2026-11-09T18:17:10.512495+00:00",
+    "num_classes": 5,
+    "classes": [
+        "No DR",
+        "Mild",
+        "Moderate",
+        "Severe",
+        "Proliferative"
+    ],
+    "validation_accuracy": 0.7244,
+    "dataset_type": "aptos",
+    "total_samples": 3662,
+    "is_active": true,
+    "accuracy": 0.724,
+    "precision_macro": 0.4625,
+    "recall_macro": 0.4741,
+    "f1_macro": 0.4545,
+    "confusion_matrix": [
+        [
+            347,
+            6,
+            4,
+            0,
+            1
+        ],
+        [
+            15,
+            12,
+            37,
+            0,
+            2
+        ],
+        [
+            10,
+            16,
+            141,
+            8,
+            36
+        ],
+        [
+            0,
+            0,
+            19,
+            1,
+            22
+        ],
+        [
+            2,
+            3,
+            20,
+            1,
+            29
+        ]
+    ],
+    "evaluated_samples": 732,
+    "classification_report": {
+        "No DR": {
+            "precision": 0.9278074866310161,
+            "recall": 0.9692737430167597,
+            "f1-score": 0.9480874316939891,
+            "support": 358.0
+        },
+        "Mild": {
+            "precision": 0.32432432432432434,
+            "recall": 0.18181818181818182,
+            "f1-score": 0.23300970873786409,
+            "support": 66.0
+        },
+        "Moderate": {
+            "precision": 0.6380090497737556,
+            "recall": 0.6682464454976303,
+            "f1-score": 0.6527777777777778,
+            "support": 211.0
+        },
+        "Severe": {
+            "precision": 0.1,
+            "recall": 0.023809523809523808,
+            "f1-score": 0.038461538461538464,
+            "support": 42.0
+        },
+        "Proliferative": {
+            "precision": 0.32222222222222224,
+            "recall": 0.5272727272727272,
+            "f1-score": 0.4,
+            "support": 55.0
+        },
+        "accuracy": 0.7240437158469946,
+        "macro avg": {
+            "precision": 0.46247261659026373,
+            "recall": 0.4740841242829646,
+            "f1-score": 0.4544672913342339,
+            "support": 732.0
+        },
+        "weighted avg": {
+            "precision": 0.6968614991035434,
+            "recall": 0.7240437158469946,
+            "f1-score": 0.7051167172809328,
+            "support": 732.0
+        }
+    }
+}

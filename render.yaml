@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: retinaguard-ai
+    runtime: docker
+    plan: starter
+    region: oregon
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WTF_CSRF_SECRET_KEY
+        generateValue: true

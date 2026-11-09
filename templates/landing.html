@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}RetinaGuard AI – AI-Based Diabetic Retinopathy Screening & Longitudinal Eye Monitoring{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="row align-items-center py-5">
+        <div class="col-lg-7">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3" style="background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.3);">
+                <i class="bi bi-shield-check text-info"></i>
+                <span class="text-info fw-semibold" style="font-size: 0.8rem; letter-spacing: 0.05em;">CLINICAL-GRADE OPHTHALMIC INTELLIGENCE</span>
+            </div>
+            <h1 class="display-4 fw-extrabold text-white mb-3" style="letter-spacing: -0.03em; line-height: 1.15;">
+                AI-Powered Diabetic Retinopathy <br>
+                <span style="background: linear-gradient(135deg, #06b6d4, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Longitudinal Monitoring</span>
+            </h1>
+            <p class="lead mb-4" style="color: var(--rg-text-secondary); max-width: 600px;">
+                Advanced deep learning fundus analysis featuring 5-class ICDR grading, Grad-CAM explainable visual attention overlays, and longitudinal dual-examination progression tracking.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-rg-primary btn-lg px-4 d-flex align-items-center gap-2">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Access Clinician Portal</span>
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-rg-secondary btn-lg px-4 d-flex align-items-center gap-2">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Register New Account</span>
+                </a>
+            </div>
+            
+            <div class="d-flex align-items-center gap-4 mt-4 pt-3 border-top border-secondary-subtle">
+                <div>
+                    <div class="fs-4 fw-bold text-white">5-Class</div>
+                    <div style="font-size: 0.75rem; color: var(--rg-text-muted);">ICDR DR Classification</div>
+                </div>
+                <div class="vr"></div>
+                <div>
+                    <div class="fs-4 fw-bold text-info">Grad-CAM</div>
+                    <div style="font-size: 0.75rem; color: var(--rg-text-muted);">Explainable Attention Maps</div>
+                </div>
+                <div class="vr"></div>
+                <div>
+                    <div class="fs-4 fw-bold text-success">Same-Eye</div>
+                    <div style="font-size: 0.75rem; color: var(--rg-text-muted);">Longitudinal Baseline Rules</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 mt-4 mt-lg-0 text-center">
+            <div class="rg-card p-4 text-center position-relative overflow-hidden">
+                <div class="position-absolute top-0 end-0 p-3">
+                    <span class="badge bg-info-subtle text-info border border-info">MobileNetV2 Transfer Learning</span>
+                </div>
+                <img src="{{ url_for('static', filename='images/samples/retina-stage2.svg') }}" alt="Fundus Visualization" class="img-fluid rounded mb-3 shadow-lg" style="max-height: 280px; border: 1px solid var(--rg-border);">
+                <h5 class="fw-bold text-white mb-1">Fundus Examination Model</h5>
+                <p class="text-secondary mb-3" style="font-size: 0.85rem;">Multi-modal feature extraction with localized retinal attention map generation.</p>
+                
+                <div class="d-flex justify-content-between p-2 rounded" style="background: var(--rg-bg-input);">
+                    <span class="text-muted" style="font-size: 0.8rem;">Current System State:</span>
+                    {% if g_model_ready %}
+                    <span class="badge bg-success">Operational</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">Weights Pending Training</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Capabilities Grid -->
+    <div class="row g-4 py-4">
+        <div class="col-md-4">
+            <div class="rg-card h-100">
+                <div class="stat-icon cyan mb-3">
+                    <i class="bi bi-eye"></i>
+                </div>
+                <h5 class="fw-bold text-white mb-2">5-Class ICDR Detection</h5>
+                <p style="color: var(--rg-text-secondary); font-size: 0.9rem;">
+                    Accurate classification across No DR, Mild, Moderate, Severe, and Proliferative Diabetic Retinopathy with full 5-way softmax probability distributions.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="rg-card h-100">
+                <div class="stat-icon blue mb-3">
+                    <i class="bi bi-layers-half"></i>
+                </div>
+                <h5 class="fw-bold text-white mb-2">Longitudinal Comparison</h5>
+                <p style="color: var(--rg-text-secondary); font-size: 0.9rem;">
+                    Rigorous comparative baseline between prior and current scans. Validates identical eye laterality (OD/OS) to prevent anatomical misalignment errors.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="rg-card h-100">
+                <div class="stat-icon emerald mb-3">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <h5 class="fw-bold text-white mb-2">Grad-CAM Visual Attention</h5>
+                <p style="color: var(--rg-text-secondary); font-size: 0.9rem;">
+                    Translates deep convolutional activations into transparent pseudo-color heatmaps, displaying AI focal regions for clinical peer review.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

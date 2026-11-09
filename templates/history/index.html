@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Screening History – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-clock-history text-info me-2"></i> Comprehensive Screening History{% endblock %}
+
+{% block content %}
+<!-- Filter & Search Controls -->
+<div class="rg-card mb-4">
+    <form method="GET" action="{{ url_for('history.index') }}">
+        <div class="row g-3 align-items-end">
+            <!-- Patient / Keyword Search -->
+            <div class="col-md-4">
+                <label class="form-label text-secondary small">Patient Name or UID</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-info"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control rg-form-control" placeholder="Search patient..." value="{{ request.args.get('q', '') }}">
+                </div>
+            </div>
+
+            <!-- DR Stage Filter -->
+            <div class="col-md-3">
+                <label class="form-label text-secondary small">DR Classification Grade</label>
+                <select name="stage" class="form-select rg-form-control">
+                    <option value="">All Categories (0-4)</option>
+                    <option value="0" {% if request.args.get('stage') == '0' %}selected{% endif %}>Class 0: No DR</option>
+                    <option value="1" {% if request.args.get('stage') == '1' %}selected{% endif %}>Class 1: Mild DR</option>
+                    <option value="2" {% if request.args.get('stage') == '2' %}selected{% endif %}>Class 2: Moderate DR</option>
+                    <option value="3" {% if request.args.get('stage') == '3' %}selected{% endif %}>Class 3: Severe DR</option>
+                    <option value="4" {% if request.args.get('stage') == '4' %}selected{% endif %}>Class 4: Proliferative DR</option>
+                </select>
+            </div>
+
+            <!-- Eye Laterality Filter -->
+            <div class="col-md-2">
+                <label class="form-label text-secondary small">Eye Laterality</label>
+                <select name="eye" class="form-select rg-form-control">
+                    <option value="">Both Eyes</option>
+                    <option value="right" {% if request.args.get('eye') == 'right' %}selected{% endif %}>Right Eye (OD)</option>
+                    <option value="left" {% if request.args.get('eye') == 'left' %}selected{% endif %}>Left Eye (OS)</option>
+                </select>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-rg-primary flex-grow-1">
+                    <i class="bi bi-funnel-fill me-1"></i> Apply Filter
+                </button>
+                {% if request.args.get('q') or request.args.get('stage') or request.args.get('eye') %}
+                <a href="{{ url_for('history.index') }}" class="btn btn-outline-secondary">Reset</a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- History Table -->
+<div class="rg-card">
+    <div class="table-responsive">
+        <table class="rg-table">
+            <thead>
+                <tr>
+                    <th>Exam #</th>
+                    <th>Patient</th>
+                    <th>Eye</th>
+                    <th>Fundus Preview</th>
+                    <th>Classification Result</th>
+                    <th>Confidence</th>
+                    <th>Exam Date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for scr in screenings %}
+                <tr>
+                    <td><span class="font-mono text-muted">#{{ scr.id }}</span></td>
+                    <td>
+                        <a href="{{ url_for('patients.detail', patient_id=scr.patient.id) }}" class="text-white fw-semibold text-decoration-none d-block">
+                            {{ scr.patient.name }}
+                        </a>
+                        <span class="font-mono text-info small">{{ scr.patient.patient_uid }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-dark border border-secondary text-light">
+                            {{ 'Right (OD)' if scr.image.eye_laterality == 'right' else 'Left (OS)' }}
+                        </span>
+                    </td>
+                    <td>
+                        {% set img_url = url_for('static', filename=scr.image.thumbnail_path.replace('static/', '')) if scr.image.thumbnail_path.startswith('static/') else url_for('uploaded_file', filename=scr.image.thumbnail_path) %}
+                        <img src="{{ img_url }}" alt="Fundus" class="rounded" style="width: 48px; height: 48px; object-fit: cover; border: 1px solid var(--rg-border);">
+                    </td>
+                    <td>
+                        <span class="dr-badge dr-badge-{{ scr.predicted_class_id }}">
+                            {{ scr.predicted_class_label.split('(')[0].strip() }}
+                        </span>
+                    </td>
+                    <td><span class="font-mono text-info fw-semibold">{{ (scr.confidence_score * 100)|round(1) }}%</span></td>
+                    <td class="text-secondary small">{{ scr.image.captured_date or scr.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('screening.result', screening_id=scr.id) }}" class="btn btn-outline-info" title="View Full Analysis">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('reports.generate_individual', screening_id=scr.id) }}" class="btn btn-outline-secondary" title="Download PDF Report">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </a>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteScreeningModal{{ scr.id }}" title="Delete Screening">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+
+                        <!-- Delete Screening Modal -->
+                        <div class="modal fade" id="deleteScreeningModal{{ scr.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="background: var(--rg-bg-secondary); border: 1px solid var(--rg-border); color: var(--rg-text-primary); text-align: left;">
+                                    <div class="modal-header border-secondary">
+                                        <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Confirm Screening Purge</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Permanently remove screening record <strong>#{{ scr.id }}</strong> for patient <strong>{{ scr.patient.name }}</strong>?</p>
+                                        <p class="text-secondary small">This removes the AI classification result and associated Grad-CAM visualization from this patient's timeline.</p>
+                                    </div>
+                                    <div class="modal-footer border-secondary">
+                                        <button type="button" class="btn btn-rg-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                        <form method="POST" action="{{ url_for('history.delete_screening', screening_id=scr.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete Record</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        No screening examinations matching the criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

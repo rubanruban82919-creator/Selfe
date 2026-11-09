@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}AI Screening Result #{{ screening.id }} – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-cpu-fill text-info me-2"></i> AI Fundus Analysis & Grad-CAM{% endblock %}
+
+{% block content %}
+<!-- Top Action Bar -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h4 class="fw-bold text-white mb-1">
+            Examination #{{ screening.id }} – {{ screening.patient.name }}
+        </h4>
+        <div class="text-secondary small">
+            Patient UID: <span class="font-mono text-info">{{ screening.patient.patient_uid }}</span> • 
+            Eye: <strong>{{ 'Right Eye (OD)' if screening.image.eye_laterality == 'right' else 'Left Eye (OS)' }}</strong> • 
+            Analyzed: {{ screening.created_at.strftime('%Y-%m-%d %H:%M UTC') }}
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('reports.generate_individual', screening_id=screening.id) }}" class="btn btn-rg-primary btn-sm">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generate Clinical PDF
+        </a>
+        <a href="{{ url_for('comparison.index', patient_id=screening.patient.id, current_id=screening.id) }}" class="btn btn-rg-secondary btn-sm">
+            <i class="bi bi-layout-split me-1"></i> Compare with Baseline
+        </a>
+        <a href="{{ url_for('screening.new_screening', patient_id=screening.patient.id) }}" class="btn btn-rg-secondary btn-sm">
+            <i class="bi bi-camera me-1"></i> New Scan
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Visual Attention & Images (Grad-CAM) -->
+    <div class="col-lg-7">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-eye-fill text-cyan"></i> Ophthalmic Visualizations</h5>
+                <ul class="nav nav-pills nav-pills-sm" id="viewTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active btn-sm" id="overlay-tab" data-bs-toggle="pill" data-bs-target="#tab-overlay" type="button">Grad-CAM Overlay</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm" id="raw-tab" data-bs-toggle="pill" data-bs-target="#tab-raw" type="button">Original Fundus</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-sm" id="heat-tab" data-bs-toggle="pill" data-bs-target="#tab-heat" type="button">Activation Heatmap</button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="tab-content text-center py-2">
+                <div class="tab-pane fade show active" id="tab-overlay">
+                    {% set overlay_src = url_for('static', filename=screening.gradcam_overlay_path.replace('static/', '')) if screening.gradcam_overlay_path.startswith('static/') else url_for('uploaded_file', filename=screening.gradcam_overlay_path) %}
+                    <img src="{{ overlay_src }}" alt="Grad-CAM Overlay" class="img-fluid rounded shadow" style="max-height: 420px; border: 1px solid var(--rg-border);">
+                    <div class="small text-muted mt-2">Figure 1: Deep Convolutional Activation Overlay blended on fundus photograph.</div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-raw">
+                    {% set raw_src = url_for('static', filename=screening.image.filepath.replace('static/', '')) if screening.image.filepath.startswith('static/') else url_for('uploaded_file', filename=screening.image.filepath) %}
+                    <img src="{{ raw_src }}" alt="Original Fundus" class="img-fluid rounded shadow" style="max-height: 420px; border: 1px solid var(--rg-border);">
+                    <div class="small text-muted mt-2">Figure 2: Digital high-resolution color fundus photograph.</div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-heat">
+                    {% set heat_src = url_for('static', filename=screening.gradcam_heatmap_path.replace('static/', '')) if screening.gradcam_heatmap_path.startswith('static/') else url_for('uploaded_file', filename=screening.gradcam_heatmap_path) %}
+                    <img src="{{ heat_src }}" alt="Grad-CAM Heatmap" class="img-fluid rounded shadow" style="max-height: 420px; border: 1px solid var(--rg-border);">
+                    <div class="small text-muted mt-2">Figure 3: Pseudo-color activation colormap (COLORMAP_JET).</div>
+                </div>
+            </div>
+
+            <!-- Medical AI Attention Disclaimer -->
+            <div class="medical-alert warning mt-3 mb-0">
+                <i class="bi bi-shield-exclamation text-warning fs-5"></i>
+                <div>
+                    <strong>Explainable AI Notice:</strong> Heatmaps represent mathematical activations of convolutional filters and are AI visual attention aids, NOT clinically confirmed lesion maps. They must not replace direct ophthalmic stereoscopic inspection.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Diagnostic Summary & 5-Class Probabilities -->
+    <div class="col-lg-5">
+        <!-- Classification Verdict Card -->
+        <div class="rg-card mb-4">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-check-circle-fill text-cyan"></i> Classification Verdict</h5>
+                <span class="badge bg-dark border border-secondary text-info">{{ screening.model_version }}</span>
+            </div>
+
+            <div class="p-3 rounded mb-3" style="background: rgba(14, 22, 41, 0.7); border: 1px solid var(--rg-border);">
+                <div class="text-secondary small mb-1">Predicted Diabetic Retinopathy Grade:</div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="dr-badge dr-badge-{{ screening.predicted_class_id }} fs-6 py-2 px-3">
+                        {{ screening.predicted_class_label }}
+                    </span>
+                    <div class="text-end">
+                        <div class="fs-4 fw-bold text-info font-mono">{{ (screening.confidence_score * 100)|round(1) }}%</div>
+                        <div class="small text-muted">Confidence</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h6 class="fw-bold text-white mb-2"><i class="bi bi-file-medical-fill text-info me-1"></i> Clinical Recommendation</h6>
+                <p class="text-secondary small p-3 rounded" style="background: var(--rg-bg-input); border-left: 3px solid var(--rg-accent-cyan);">
+                    {{ screening.clinical_recommendation }}
+                </p>
+            </div>
+
+            <!-- Quality Assessment -->
+            <div class="d-flex align-items-center justify-content-between p-2.5 rounded bg-dark border border-secondary-subtle small text-secondary">
+                <span>Image Quality Assessment:</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    {{ screening.image.quality_assessment }} ({{ screening.image.quality_score }}%)
+                </span>
+            </div>
+        </div>
+
+        <!-- 5-Class Probability Distribution Breakdown -->
+        <div class="rg-card">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-bar-chart-fill text-cyan"></i> 5-Class Softmax Distribution</h5>
+                <span class="badge bg-secondary-subtle text-secondary small">Total 100%</span>
+            </div>
+
+            {% set probs = screening.probabilities_dict() %}
+            <div class="d-flex flex-column gap-3">
+                <!-- Class 0: No DR -->
+                <div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-white">Class 0: No DR</span>
+                        <span class="font-mono text-success fw-bold">{{ probs['No DR'] }}%</span>
+                    </div>
+                    <div class="progress" style="height: 7px; background: rgba(255,255,255,0.08);">
+                        <div class="progress-bar bg-success" style="width: {{ probs['No DR'] }}%;"></div>
+                    </div>
+                </div>
+
+                <!-- Class 1: Mild -->
+                <div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-white">Class 1: Mild DR</span>
+                        <span class="font-mono text-info fw-bold">{{ probs['Mild'] }}%</span>
+                    </div>
+                    <div class="progress" style="height: 7px; background: rgba(255,255,255,0.08);">
+                        <div class="progress-bar bg-info" style="width: {{ probs['Mild'] }}%;"></div>
+                    </div>
+                </div>
+
+                <!-- Class 2: Moderate -->
+                <div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-white">Class 2: Moderate DR</span>
+                        <span class="font-mono text-warning fw-bold">{{ probs['Moderate'] }}%</span>
+                    </div>
+                    <div class="progress" style="height: 7px; background: rgba(255,255,255,0.08);">
+                        <div class="progress-bar bg-warning" style="width: {{ probs['Moderate'] }}%;"></div>
+                    </div>
+                </div>
+
+                <!-- Class 3: Severe -->
+                <div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-white">Class 3: Severe DR</span>
+                        <span class="font-mono text-danger fw-bold" style="color: #fb923c !important;">{{ probs['Severe'] }}%</span>
+                    </div>
+                    <div class="progress" style="height: 7px; background: rgba(255,255,255,0.08);">
+                        <div class="progress-bar" style="width: {{ probs['Severe'] }}%; background-color: #fb923c;"></div>
+                    </div>
+                </div>
+
+                <!-- Class 4: Proliferative -->
+                <div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-white">Class 4: Proliferative DR</span>
+                        <span class="font-mono text-danger fw-bold">{{ probs['Proliferative'] }}%</span>
+                    </div>
+                    <div class="progress" style="height: 7px; background: rgba(255,255,255,0.08);">
+                        <div class="progress-bar bg-danger" style="width: {{ probs['Proliferative'] }}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

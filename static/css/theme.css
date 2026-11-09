@@ -1,0 +1,54 @@
+/* RetinaGuard AI Theme System */
+:root {
+    /* Medical Dark Navy Theme (Default) */
+    --rg-bg-primary: #0a0f1d;
+    --rg-bg-secondary: #11182c;
+    --rg-bg-card: rgba(17, 24, 44, 0.85);
+    --rg-bg-card-hover: rgba(24, 34, 61, 0.95);
+    --rg-bg-input: #0e1629;
+    --rg-border: rgba(56, 189, 248, 0.18);
+    --rg-border-glow: rgba(56, 189, 248, 0.35);
+
+    /* Text */
+    --rg-text-primary: #f8fafc;
+    --rg-text-secondary: #94a3b8;
+    --rg-text-muted: #64748b;
+
+    /* Accents - Cyan & Electric Blue */
+    --rg-accent-cyan: #06b6d4;
+    --rg-accent-cyan-glow: rgba(6, 182, 212, 0.25);
+    --rg-accent-blue: #3b82f6;
+    --rg-accent-indigo: #6366f1;
+    --rg-accent-emerald: #10b981;
+    --rg-accent-amber: #f59e0b;
+    --rg-accent-rose: #f43f5e;
+
+    /* Shadows & Glassmorphism */
+    --rg-card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+    --rg-glow-shadow: 0 0 25px rgba(6, 182, 212, 0.18);
+    --rg-backdrop: blur(14px);
+    --rg-sidebar-width: 270px;
+    --rg-topbar-height: 70px;
+}
+
+[data-theme="light"] {
+    --rg-bg-primary: #f8fafc;
+    --rg-bg-secondary: #ffffff;
+    --rg-bg-card: rgba(255, 255, 255, 0.95);
+    --rg-bg-card-hover: #f1f5f9;
+    --rg-bg-input: #f8fafc;
+    --rg-border: rgba(203, 213, 225, 0.8);
+    --rg-border-glow: rgba(6, 182, 212, 0.4);
+
+    --rg-text-primary: #0f172a;
+    --rg-text-secondary: #475569;
+    --rg-text-muted: #94a3b8;
+
+    --rg-accent-cyan: #0891b2;
+    --rg-accent-cyan-glow: rgba(8, 145, 178, 0.15);
+    --rg-accent-blue: #2563eb;
+    --rg-accent-indigo: #4f46e5;
+
+    --rg-card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    --rg-glow-shadow: 0 0 20px rgba(8, 145, 178, 0.12);
+}

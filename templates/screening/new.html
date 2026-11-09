@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}New Retinal Screening – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-camera-fill text-info me-2"></i> New Fundus Examination & AI Screening{% endblock %}
+
+{% block content %}
+<!-- AI Model Readiness Safety Warning -->
+{% if not g_model_ready %}
+<div class="model-guard-banner mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-shield-slash-fill fs-2 text-warning"></i>
+        <div>
+            <div class="fw-bold" style="font-size: 1.05rem;">AI Prediction Engine Blocked – Weights Required</div>
+            <div style="font-size: 0.88rem; color: #fef08a;">
+                No trained weights file exists at <code>models/dr_model.h5</code>. Per RetinaGuard safety protocols, automated inference is blocked until weights are trained via the Training Module or mounted into <code>models/</code>.
+            </div>
+        </div>
+    </div>
+    <a href="{{ url_for('admin.index') }}" class="btn btn-warning btn-sm text-dark fw-bold">Training Guide</a>
+</div>
+{% endif %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="rg-card">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title">
+                    <i class="bi bi-upload text-cyan"></i>
+                    Upload Fundus Photograph & Clinical Metadata
+                </h5>
+                <span class="badge bg-secondary-subtle text-secondary small">ICDR Standard</span>
+            </div>
+
+            <form method="POST" action="{{ url_for('screening.run_screening') }}" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- Patient Selection -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-7">
+                        <label class="form-label text-secondary small fw-semibold">Select Patient *</label>
+                        <select name="patient_id" class="form-select rg-form-control" required>
+                            <option value="">-- Choose Existing Patient --</option>
+                            {% for p in patients %}
+                            <option value="{{ p.id }}" {% if selected_patient_id and selected_patient_id == p.id %}selected{% endif %}>
+                                {{ p.patient_uid }} – {{ p.name }} ({{ p.age }}y, {{ p.diabetes_type }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label text-secondary small fw-semibold">Examination Date *</label>
+                        <input type="date" name="captured_date" class="form-control rg-form-control" value="{{ today_str }}" required>
+                    </div>
+                </div>
+
+                <!-- Eye Laterality Selection (Crucial for Same-Eye Integrity) -->
+                <div class="mb-4">
+                    <label class="form-label text-secondary small fw-semibold d-block">Eye Laterality (Anatomical Eye) *</label>
+                    <div class="d-flex gap-3">
+                        <div class="flex-grow-1">
+                            <input type="radio" class="btn-check" name="eye_laterality" id="eyeOD" value="right" checked>
+                            <label class="btn btn-outline-info w-100 py-2 d-flex align-items-center justify-content-center gap-2" for="eyeOD">
+                                <i class="bi bi-eye"></i>
+                                <span>Right Eye (OD - Oculus Dexter)</span>
+                            </label>
+                        </div>
+                        <div class="flex-grow-1">
+                            <input type="radio" class="btn-check" name="eye_laterality" id="eyeOS" value="left">
+                            <label class="btn btn-outline-info w-100 py-2 d-flex align-items-center justify-content-center gap-2" for="eyeOS">
+                                <i class="bi bi-eye"></i>
+                                <span>Left Eye (OS - Oculus Sinister)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-text text-muted small mt-1">
+                        <i class="bi bi-info-circle me-1"></i> Eye laterality is strictly enforced for longitudinal progression comparison.
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Fundus Upload Zone -->
+                <div class="mb-4">
+                    <label class="form-label text-secondary small fw-semibold d-block">Digital Fundus Photograph (JPG / JPEG / PNG) *</label>
+                    
+                    <div class="upload-dropzone" id="retinaDropzone">
+                        <i class="bi bi-cloud-arrow-up text-info" style="font-size: 3rem;"></i>
+                        <h6 class="fw-bold text-white mt-2 mb-1">Drag & Drop Retinal Image Here</h6>
+                        <p class="text-secondary small mb-3">or browse from your local computer (Max 16 MB)</p>
+                        <button type="button" class="btn btn-rg-secondary btn-sm">
+                            <i class="bi bi-folder2-open me-1"></i> Choose Image File
+                        </button>
+                    </div>
+
+                    <!-- Hidden File Input -->
+                    <input type="file" id="retinalImageInput" name="retinal_image" class="d-none" accept=".jpg,.jpeg,.png" required>
+
+                    <!-- Image Preview Container -->
+                    <div id="uploadPreviewContainer" class="d-none mt-3 p-3 rounded bg-dark border border-secondary">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                <span class="fw-semibold text-white small" id="uploadFileName">image.jpg</span>
+                                <span class="badge bg-secondary-subtle text-muted" id="uploadFileSize">0 MB</span>
+                            </div>
+                            <button type="button" class="btn btn-outline-danger btn-sm" id="removeImageBtn">
+                                <i class="bi bi-x-circle me-1"></i> Remove
+                            </button>
+                        </div>
+                        <div class="text-center">
+                            <img id="retinaPreviewImg" src="" alt="Preview" class="rounded shadow-sm" style="max-height: 260px; max-width: 100%; border: 1px solid var(--rg-border);">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submission Controls -->
+                <div class="d-flex align-items-center justify-content-between pt-3 border-top border-secondary">
+                    <div class="text-secondary small">
+                        <i class="bi bi-shield-check text-info me-1"></i>
+                        Automated Grad-CAM feature localization enabled
+                    </div>
+
+                    <button type="submit" id="submitScreeningBtn" class="btn btn-rg-primary px-4 py-2" {% if not g_model_ready %}disabled title="Prediction blocked: AI model not ready"{% endif %}>
+                        <i class="bi bi-cpu-fill me-1"></i>
+                        Execute AI Screening
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

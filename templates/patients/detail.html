@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient.name }} – Patient Record – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-person-badge-fill text-info me-2"></i> Patient Longitudinal Record{% endblock %}
+
+{% block content %}
+<!-- Patient Header Summary -->
+<div class="rg-card mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="user-avatar-sm" style="width: 56px; height: 56px; font-size: 1.4rem;">
+                {{ patient.name[:1].upper() }}
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <h3 class="fw-bold text-white mb-0">{{ patient.name }}</h3>
+                    <span class="badge bg-dark border border-secondary text-info font-mono">{{ patient.patient_uid }}</span>
+                </div>
+                <div class="text-secondary small mt-1">
+                    {{ patient.age }} yrs old • {{ patient.gender }} • Contact: {{ patient.contact or 'Not recorded' }}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('screening.new_screening', patient_id=patient.id) }}" class="btn btn-rg-primary btn-sm">
+                <i class="bi bi-camera-fill me-1"></i> New Screening
+            </a>
+            <a href="{{ url_for('comparison.index', patient_id=patient.id) }}" class="btn btn-rg-secondary btn-sm">
+                <i class="bi bi-arrow-left-right me-1"></i> Compare Scans
+            </a>
+            <a href="{{ url_for('patients.edit', patient_id=patient.id) }}" class="btn btn-rg-secondary btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+        </div>
+    </div>
+
+    <!-- Clinical Clinical Badges -->
+    <div class="row g-3 mt-3 pt-3 border-top border-secondary">
+        <div class="col-sm-4">
+            <div class="text-muted small">Diabetes History:</div>
+            <div class="text-white fw-semibold">{{ patient.diabetes_type }} ({{ patient.diabetes_duration_years }} yrs)</div>
+        </div>
+        <div class="col-sm-4">
+            <div class="text-muted small">Total Retinal Scans:</div>
+            <div class="text-info fw-semibold">{{ patient.images.count() }} Recorded Examinations</div>
+        </div>
+        <div class="col-sm-4">
+            <div class="text-muted small">Clinical Notes:</div>
+            <div class="text-secondary small text-truncate">{{ patient.medical_notes or 'No specific notes recorded.' }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Longitudinal Progression Trend Chart -->
+{% if timeline_screenings %}
+<div class="rg-card mb-4">
+    <div class="rg-card-header">
+        <h5 class="rg-card-title"><i class="bi bi-graph-up text-cyan"></i> Longitudinal DR Stage & Confidence Trend</h5>
+        <span class="badge bg-dark border border-secondary text-muted small">Chronological History</span>
+    </div>
+    <div style="height: 250px; position: relative;">
+        <canvas id="progressionChart"></canvas>
+    </div>
+    <div class="p-2.5 mt-3 rounded border border-secondary-subtle small text-secondary" style="background: rgba(14, 22, 41, 0.7);">
+        <i class="bi bi-info-circle-fill text-info me-1"></i>
+        <strong>Clinical Progression Notice:</strong> Variations in AI classification scores reflect machine inference on fundus features. A change in AI stage or confidence does not directly prove biological disease progression or regression. Always perform full dilated fundus biomicroscopy.
+    </div>
+</div>
+{% endif %}
+
+<!-- Chronological Screening Timeline -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-clock-history text-cyan"></i> Chronological Screening Timeline</h5>
+            </div>
+
+            {% if timeline_screenings %}
+            <div class="timeline p-2">
+                {% for scr in timeline_screenings %}
+                <div class="d-flex gap-3 mb-4 position-relative">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="rounded-circle p-2 bg-dark border border-{{ 'danger' if scr.predicted_class_id >= 3 else ('warning' if scr.predicted_class_id == 2 else 'info') }}">
+                            <i class="bi bi-eye-fill text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 border-start border-secondary my-1" style="width: 2px;"></div>
+                    </div>
+
+                    <div class="rg-card flex-grow-1 p-3">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                            <div>
+                                <span class="fw-bold text-white">
+                                    {{ 'Right Eye (OD)' if scr.image.eye_laterality == 'right' else 'Left Eye (OS)' }}
+                                </span>
+                                <span class="text-secondary small ms-2">Exam Date: {{ scr.image.captured_date or scr.created_at.strftime('%Y-%m-%d') }}</span>
+                            </div>
+                            <span class="dr-badge dr-badge-{{ scr.predicted_class_id }}">
+                                {{ scr.predicted_class_label.split('(')[0].strip() }}
+                            </span>
+                        </div>
+
+                        <div class="d-flex gap-3 align-items-center mt-2">
+                            <img src="{{ url_for('static', filename=scr.image.thumbnail_path.replace('static/', '')) if scr.image.thumbnail_path.startswith('static/') else url_for('uploaded_file', filename=scr.image.thumbnail_path) }}" 
+                                 alt="Fundus" class="rounded" style="width: 72px; height: 72px; object-fit: cover; border: 1px solid var(--rg-border);">
+                            <div class="flex-grow-1">
+                                <div class="text-secondary small">Model: <span class="text-light">{{ scr.model_version }}</span> (Confidence: <strong class="text-info">{{ (scr.confidence_score * 100)|round(1) }}%</strong>)</div>
+                                <div class="text-secondary small mt-1 text-truncate" style="max-width: 480px;">{{ scr.clinical_recommendation }}</div>
+                            </div>
+                            <div>
+                                <a href="{{ url_for('screening.result', screening_id=scr.id) }}" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-camera-slash fs-1 d-block mb-2"></i>
+                No retinal screening examinations on file for this patient.
+                <div class="mt-3">
+                    <a href="{{ url_for('screening.new_screening', patient_id=patient.id) }}" class="btn btn-rg-primary btn-sm">
+                        Perform First Fundus Screening
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Retinal Images Historical Gallery -->
+    <div class="col-lg-4">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-images text-cyan"></i> Fundus Gallery</h5>
+                <span class="badge bg-dark border border-secondary text-info">{{ patient.images.count() }} Images</span>
+            </div>
+
+            <div class="row g-2">
+                {% for img in patient.images %}
+                <div class="col-6">
+                    <div class="position-relative rounded overflow-hidden border border-secondary">
+                        <img src="{{ url_for('static', filename=img.filepath.replace('static/', '')) if img.filepath.startswith('static/') else url_for('uploaded_file', filename=img.filepath) }}" 
+                             alt="Fundus" class="img-fluid" style="height: 110px; width: 100%; object-fit: cover;">
+                        <span class="position-absolute bottom-0 start-0 m-1 badge bg-dark bg-opacity-75 font-mono" style="font-size: 0.65rem;">
+                            {{ 'OD' if img.eye_laterality == 'right' else 'OS' }} • {{ img.captured_date }}
+                        </span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-center text-muted py-4">No images uploaded.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if timeline_screenings %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('progressionChart').getContext('2d');
+    const labels = [{% for s in timeline_screenings %}'{{ s.image.captured_date or s.created_at.strftime("%Y-%m-%d") }} ({{ "OD" if s.image.eye_laterality == "right" else "OS" }})',{% endfor %}];
+    const stages = [{% for s in timeline_screenings %}{{ s.predicted_class_id }},{% endfor %}];
+    const confidences = [{% for s in timeline_screenings %}{{ (s.confidence_score * 100)|round(1) }},{% endfor %}];
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'DR Stage (0 to 4)',
+                    data: stages,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    borderWidth: 2.5,
+                    stepped: true,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'AI Confidence (%)',
+                    data: confidences,
+                    borderColor: '#06b6d4',
+                    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                    borderWidth: 1.5,
+                    borderDash: [5, 5],
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                y: {
+                    type: 'linear',
+                    position: 'left',
+                    min: 0,
+                    max: 4,
+                    ticks: {
+                        stepSize: 1,
+                        color: '#fbbf24',
+                        callback: function(value) {
+                            const map = ['No DR', 'Mild', 'Mod', 'Severe', 'PDR'];
+                            return map[value] || value;
+                        }
+                    },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'right',
+                    min: 50,
+                    max: 100,
+                    ticks: {
+                        color: '#06b6d4',
+                        callback: (v) => v + '%'
+                    },
+                    grid: { drawOnChartArea: false }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#f8fafc' }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

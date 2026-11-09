@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Register Clinician Account – RetinaGuard AI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="rg-card p-4 shadow-lg">
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="RetinaGuard" style="width: 44px; height: 44px; filter: drop-shadow(0 0 10px var(--rg-accent-cyan));" class="mb-2">
+                <h4 class="fw-bold text-white">Create Clinician Account</h4>
+                <p class="text-secondary" style="font-size: 0.85rem;">Join the ophthalmic diagnostic screening network</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="mb-3">
+                    <label class="form-label text-secondary" style="font-size: 0.85rem;">Full Clinical Name</label>
+                    <input type="text" name="full_name" class="form-control rg-form-control" placeholder="e.g. Dr. Jordan Reed, MD" required>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary" style="font-size: 0.85rem;">Username</label>
+                        <input type="text" name="username" class="form-control rg-form-control" placeholder="e.g. dr_reed" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary" style="font-size: 0.85rem;">Clinical Role</label>
+                        <select name="role" class="form-select rg-form-control">
+                            <option value="clinician" selected>Clinician / Doctor</option>
+                            <option value="admin">System Administrator</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-secondary" style="font-size: 0.85rem;">Institutional Email</label>
+                    <input type="email" name="email" class="form-control rg-form-control" placeholder="e.g. j.reed@eyehealth.org" required>
+                </div>
+
+                <div class="row g-2 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary" style="font-size: 0.85rem;">Password</label>
+                        <input type="password" name="password" class="form-control rg-form-control" placeholder="••••••••" required minlength="6">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary" style="font-size: 0.85rem;">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control rg-form-control" placeholder="••••••••" required minlength="6">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-rg-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-person-check-fill"></i>
+                    <span>Register Account</span>
+                </button>
+            </form>
+
+            <div class="mt-4 pt-3 border-top border-secondary text-center">
+                <span class="text-secondary" style="font-size: 0.85rem;">Already have access credentials?</span>
+                <a href="{{ url_for('auth.login') }}" class="text-info fw-semibold ms-1" style="font-size: 0.85rem;">Sign In</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

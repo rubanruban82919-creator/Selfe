@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Control – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-shield-lock-fill text-info me-2"></i> System Administration & Governance{% endblock %}
+
+{% block content %}
+<!-- Admin Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon cyan"><i class="bi bi-person-gear"></i></div>
+            <div>
+                <div class="stat-value">{{ users|length }}</div>
+                <div class="stat-label">Registered Accounts</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-database-fill-check"></i></div>
+            <div>
+                <div class="stat-value">{{ db_size_kb }} KB</div>
+                <div class="stat-label">SQLite Storage</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon emerald"><i class="bi bi-cpu-fill"></i></div>
+            <div>
+                <div class="stat-value">{{ 'Active' if g_model_ready else 'Pending' }}</div>
+                <div class="stat-label">Model Weights Status</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon rose"><i class="bi bi-journal-text"></i></div>
+            <div>
+                <div class="stat-value">{{ logs|length }}</div>
+                <div class="stat-label">Audit Logs Recorded</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- User Management Table -->
+    <div class="col-lg-8">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-people text-cyan"></i> User Access & Role-Based Control (RBAC)</h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="rg-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-white">{{ u.full_name }}</div>
+                                <div class="small text-secondary">@{{ u.username }} • {{ u.email }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'primary' if u.role == 'admin' else 'info' }}-subtle text-{{ 'primary' if u.role == 'admin' else 'info' }} border border-{{ 'primary' if u.role == 'admin' else 'info' }}">
+                                    {{ u.role|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if u.is_active %}
+                                <span class="text-success small"><i class="bi bi-check-circle-fill me-1"></i> Active</span>
+                                {% else %}
+                                <span class="text-danger small"><i class="bi bi-x-circle-fill me-1"></i> Disabled</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-secondary small">{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '' }}</td>
+                            <td class="text-end">
+                                {% if u.id != current_user.id %}
+                                <form method="POST" action="{{ url_for('admin.toggle_user_role', user_id=u.id) }}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm" title="Toggle Admin/Clinician Role">
+                                        <i class="bi bi-arrow-repeat"></i> Role
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="badge bg-dark border border-secondary text-muted">You</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Model Metadata Card -->
+    <div class="col-lg-4">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-cpu text-cyan"></i> AI Model Configuration</h5>
+            </div>
+
+            <div class="mb-3">
+                <div class="small text-muted">Active Model Version:</div>
+                <div class="text-white fw-bold">{{ model_info.version_name if model_info else 'MobileNetV2-v1.0' }}</div>
+            </div>
+
+            <div class="mb-3">
+                <div class="small text-muted">Base Architecture:</div>
+                <div class="text-info small fw-medium">{{ model_info.architecture if model_info else 'MobileNetV2 (Transfer Learning)' }}</div>
+            </div>
+
+            <div class="mb-3">
+                <div class="small text-muted">Weights File Path:</div>
+                <div class="font-mono text-light small">models/dr_model.h5</div>
+                <div class="mt-1">
+                    {% if g_model_ready %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Weights File Present & Verified</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> Weights Absent (Prediction Blocked)</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="p-2.5 rounded bg-dark border border-secondary small text-secondary">
+                <div class="fw-semibold text-white mb-1"><i class="bi bi-folder-fill text-warning me-1"></i> Dataset Support:</div>
+                APTOS 2019 Blindness Detection & EyePACS Diabetic Retinopathy datasets supported for training and evaluation.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Audit Logs -->
+<div class="rg-card">
+    <div class="rg-card-header">
+        <h5 class="rg-card-title"><i class="bi bi-activity text-cyan"></i> System Audit & Clinical Activity Logs</h5>
+        <span class="badge bg-secondary-subtle text-secondary small">Security Event Stream</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="rg-table">
+            <thead>
+                <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="font-mono text-secondary small">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>
+                        <span class="fw-semibold text-white">{{ log.user.username if log.user else 'System' }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-dark border border-secondary text-info font-mono">{{ log.action }}</span>
+                    </td>
+                    <td class="text-secondary small">{{ log.details }}</td>
+                    <td class="font-mono text-muted small">{{ log.ip_address or '127.0.0.1' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No audit logs recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

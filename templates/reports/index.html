@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical PDF Reports – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-file-earmark-medical-fill text-info me-2"></i> Clinical PDF Reports Repository{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- Quick Report Generator Card -->
+    <div class="col-lg-4">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-printer-fill text-cyan"></i> Report Generator</h5>
+            </div>
+            <p class="text-secondary small mb-3">
+                Generate certified clinical summary PDF documents incorporating fundus photography, Grad-CAM attention maps, ICDR grading, and longitudinal differentials.
+            </p>
+
+            <div class="d-flex flex-column gap-2">
+                <a href="{{ url_for('history.index') }}" class="btn btn-rg-primary btn-sm text-start py-2">
+                    <i class="bi bi-file-earmark-person-fill me-2"></i> Individual Screening Report
+                    <div class="small text-white-50 ms-4">Generate for a single examination</div>
+                </a>
+                <a href="{{ url_for('comparison.index') }}" class="btn btn-rg-secondary btn-sm text-start py-2">
+                    <i class="bi bi-layout-split me-2"></i> Longitudinal Comparison Report
+                    <div class="small text-secondary ms-4">Generate for baseline vs follow-up</div>
+                </a>
+            </div>
+
+            <div class="p-2.5 mt-3 rounded bg-dark border border-secondary-subtle text-secondary small">
+                <i class="bi bi-info-circle text-info me-1"></i> Generated reports include medical disclaimers and timestamps for clinical compliance.
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Statistics Overview -->
+    <div class="col-lg-8">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-folder2-open text-cyan"></i> Generated Reports Archive</h5>
+                <span class="badge bg-dark border border-secondary text-info">{{ reports|length }} PDF Documents</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="rg-table">
+                    <thead>
+                        <tr>
+                            <th>Doc ID</th>
+                            <th>Patient</th>
+                            <th>Report Type</th>
+                            <th>Generated At</th>
+                            <th class="text-end">Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in reports %}
+                        <tr>
+                            <td><span class="font-mono text-muted">#REP-{{ r.id }}</span></td>
+                            <td>
+                                <a href="{{ url_for('patients.detail', patient_id=r.patient.id) }}" class="text-white text-decoration-none fw-semibold">
+                                    {{ r.patient.name }}
+                                </a>
+                                <span class="font-mono text-info small d-block">{{ r.patient.patient_uid }}</span>
+                            </td>
+                            <td>
+                                {% if r.report_type == 'individual' %}
+                                <span class="badge bg-info-subtle text-info border border-info">
+                                    <i class="bi bi-file-earmark-text me-1"></i> Individual
+                                </span>
+                                {% else %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary">
+                                    <i class="bi bi-layout-split me-1"></i> Longitudinal
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-secondary small">{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('reports.download', report_id=r.id) }}" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-download me-1"></i> Download PDF
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-5">
+                                <i class="bi bi-file-earmark-pdf fs-1 d-block mb-2"></i>
+                                No PDF reports generated yet. Generate reports from the Screening Results or Comparison modules.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

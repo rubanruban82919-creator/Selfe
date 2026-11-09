@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <radialGradient id="fundusBg4" cx="48%" cy="48%" r="52%">
+      <stop offset="0%" stop-color="#A83011" />
+      <stop offset="60%" stop-color="#731704" />
+      <stop offset="85%" stop-color="#420B02" />
+      <stop offset="100%" stop-color="#080201" />
+    </radialGradient>
+    <radialGradient id="opticDisc4" cx="45%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#FFF8D6" />
+      <stop offset="45%" stop-color="#FFD175" />
+      <stop offset="85%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </radialGradient>
+    <radialGradient id="maculaGrad4" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3D0B02" />
+      <stop offset="50%" stop-color="#6E1B08" />
+      <stop offset="100%" stop-color="#A22F11" stop-opacity="0" />
+    </radialGradient>
+    <!-- Preretinal Boat Hemorrhage Gradient -->
+    <linearGradient id="preretinalHemo" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#881337" />
+      <stop offset="60%" stop-color="#580A1F" />
+      <stop offset="100%" stop-color="#3F0413" />
+    </linearGradient>
+    <filter id="neoFrondGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.5" flood-color="#EF4444" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+
+  <clipPath id="circleClip4">
+    <circle cx="400" cy="400" r="380" />
+  </clipPath>
+
+  <g clip-path="url(#circleClip4)">
+    <!-- Base Fundus Tissue -->
+    <circle cx="400" cy="400" r="390" fill="url(#fundusBg4)" />
+
+    <!-- Macula Avascular Zone & Fovea Centralis -->
+    <circle cx="490" cy="405" r="75" fill="url(#maculaGrad4)" />
+    <circle cx="490" cy="405" r="14" fill="#360801" />
+
+    <!-- Optic Nerve Head -->
+    <g transform="translate(260, 400)">
+      <ellipse cx="0" cy="0" rx="44" ry="50" fill="url(#opticDisc4)" />
+      <ellipse cx="-4" cy="-2" rx="22" ry="26" fill="#FFFBEB" opacity="0.9" />
+    </g>
+
+    <!-- Superior & Inferior Retinal Vascular Arcades -->
+    <path d="M 264 380 Q 280 290 350 220 T 520 180 T 680 230" fill="none" stroke="#D13A1B" stroke-width="6.5" stroke-linecap="round"/>
+    <path d="M 258 375 Q 295 270 380 205 T 560 170 T 710 240" fill="none" stroke="#8A1305" stroke-width="11" stroke-linecap="round" stroke-dasharray="14 4"/>
+
+    <path d="M 266 422 Q 290 510 370 575 T 550 610 T 690 550" fill="none" stroke="#D13A1B" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 260 428 Q 305 530 395 590 T 580 620 T 720 540" fill="none" stroke="#8A1305" stroke-width="11" stroke-linecap="round"/>
+
+    <!-- Neovascularization at the Disc (NVD - Pathological fronds of new vessels on optic disc) -->
+    <g filter="url(#neoFrondGlow)" stroke="#EF4444" fill="none" stroke-linecap="round">
+      <path d="M 260 380 Q 240 360 250 340 T 270 330 Q 280 350 268 375" stroke-width="2.5"/>
+      <path d="M 275 390 Q 295 370 300 350 T 285 340 Q 270 360 274 388" stroke-width="2"/>
+      <path d="M 245 410 Q 230 425 235 440 T 255 435 Q 250 420 248 405" stroke-width="2.2"/>
+      <path d="M 265 420 Q 280 440 275 455 T 260 450 Q 255 430 262 418" stroke-width="2"/>
+    </g>
+
+    <!-- Neovascularization Elsewhere (NVE - New vessel net at superior arcade) -->
+    <g filter="url(#neoFrondGlow)" stroke="#F43F5E" fill="none" stroke-linecap="round">
+      <path d="M 520 180 Q 540 160 555 175 T 540 195 Q 525 185 520 180" stroke-width="2.2"/>
+      <path d="M 545 170 Q 565 155 580 170 T 565 190" stroke-width="1.8"/>
+      <path d="M 370 210 Q 385 190 400 205 T 385 220" stroke-width="2"/>
+    </g>
+
+    <!-- Preretinal / Subhyaloid Hemorrhage (Boat-shaped with flat horizontal fluid level) -->
+    <g transform="translate(420, 310)">
+      <!-- Flat top horizontal fluid meniscus with curved dependent bottom -->
+      <path d="M 0 0 L 140 0 C 140 60 100 80 70 80 C 40 80 0 60 0 0 Z" fill="url(#preretinalHemo)" stroke="#4C0519" stroke-width="1.5" opacity="0.96"/>
+    </g>
+
+    <!-- Vitreous Hemorrhage haze / tractional strands -->
+    <path d="M 320 340 Q 420 320 540 280" stroke="#F1F5F9" stroke-width="3" opacity="0.45" filter="url(#neoFrondGlow)"/>
+
+    <!-- Widespread Deep Blot Hemorrhages in all quadrants -->
+    <ellipse cx="610" cy="460" rx="20" ry="14" fill="#7F1D1D" opacity="0.95"/>
+    <ellipse cx="670" cy="510" rx="18" ry="12" fill="#881337" opacity="0.95"/>
+    <ellipse cx="530" cy="560" rx="16" ry="11" fill="#7F1D1D" opacity="0.95"/>
+    <ellipse cx="380" cy="520" rx="18" ry="12" fill="#7F1D1D" opacity="0.9"/>
+    <ellipse cx="170" cy="380" rx="16" ry="10" fill="#7F1D1D" opacity="0.9"/>
+    <ellipse cx="200" cy="460" rx="18" ry="12" fill="#881337" opacity="0.9"/>
+
+    <!-- Clinical Badge Overlay -->
+    <g transform="translate(40, 60)">
+      <rect width="280" height="42" rx="21" fill="rgba(16, 27, 53, 0.9)" stroke="#EF4444" stroke-width="2"/>
+      <circle cx="24" cy="21" r="7" fill="#EF4444"/>
+      <text x="42" y="26" font-family="'Plus Jakarta Sans', sans-serif" font-size="14" font-weight="800" fill="#FFFFFF">STAGE 4: PROLIFERATIVE (PDR)</text>
+    </g>
+  </g>
+</svg>

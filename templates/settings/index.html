@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-gear-fill text-info me-2"></i> Application & Clinical Settings{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Clinical & Interface Preferences -->
+    <div class="col-lg-8">
+        <div class="rg-card mb-4">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-palette-fill text-cyan"></i> Display & Visual Preferences</h5>
+            </div>
+            
+            <div class="mb-4">
+                <label class="form-label text-secondary small fw-semibold">Workspace Visual Theme</label>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded border border-info" style="background: #0a0f1d; cursor: pointer;" onclick="applyTheme('dark'); localStorage.setItem('rg_theme', 'dark');">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-white"><i class="bi bi-moon-stars-fill text-warning me-1"></i> Dark Navy Theme</span>
+                                <span class="badge bg-info">Default</span>
+                            </div>
+                            <p class="text-secondary small mb-0">High-contrast dark clinical palette optimized for low-light examination rooms and ophthalmology screens.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded border border-secondary" style="background: #ffffff; cursor: pointer;" onclick="applyTheme('light'); localStorage.setItem('rg_theme', 'light');">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-dark"><i class="bi bi-sun-fill text-warning me-1"></i> Medical Light Mode</span>
+                                <span class="badge bg-secondary">Optional</span>
+                            </div>
+                            <p class="text-muted small mb-0">Clean daylight clinical aesthetic suited for well-lit office and administrative workstations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rg-card">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-folder-symlink-fill text-cyan"></i> Storage & Storage Paths</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="rg-table">
+                    <tbody>
+                        <tr>
+                            <td class="text-secondary small" style="width: 200px;">Database File</td>
+                            <td class="font-mono text-info small">{{ config['DATABASE_PATH'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary small">Uploads Directory</td>
+                            <td class="font-mono text-light small">{{ config['UPLOAD_FOLDER'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary small">Grad-CAM Heatmaps</td>
+                            <td class="font-mono text-light small">{{ config['HEATMAP_FOLDER'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary small">PDF Reports Storage</td>
+                            <td class="font-mono text-light small">{{ config['REPORTS_FOLDER'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary small">Model Weights</td>
+                            <td class="font-mono text-light small">{{ config['MODEL_WEIGHTS_PATH'] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- About RetinaGuard AI -->
+    <div class="col-lg-4">
+        <div class="rg-card text-center p-4">
+            <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="RetinaGuard" style="width: 56px; height: 56px;" class="mb-3">
+            <h5 class="fw-bold text-white mb-1">RetinaGuard AI</h5>
+            <div class="text-info small mb-3">Version 1.0.0-PROD (Windows Edition)</div>
+
+            <p class="text-secondary small mb-3">
+                Comprehensive AI-based diabetic retinopathy classification, explainable Grad-CAM visual attention mapping, and longitudinal progression tracking system.
+            </p>
+
+            <div class="p-3 rounded bg-dark border border-secondary text-start small text-secondary mb-3">
+                <div class="text-white fw-semibold mb-1">Architectural Specifications:</div>
+                <div>• Backend: Python / Flask / SQLAlchemy</div>
+                <div>• AI Core: MobileNetV2 Transfer Learning</div>
+                <div>• Report Generator: ReportLab Engine</div>
+                <div>• Database: SQLite with ACID transactions</div>
+            </div>
+
+            <div class="text-muted" style="font-size: 0.75rem;">
+                Developed for ophthalmic clinical screening research and decision support.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

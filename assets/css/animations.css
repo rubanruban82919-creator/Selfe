@@ -1,0 +1,142 @@
+/* ==========================================================================
+   RETINAGUARD AI – MICRO-INTERACTIONS & REFINED ANIMATIONS
+   Professional, subtle, clinical-grade transitions
+   ========================================================================== */
+
+/* 1. Page View Transitions */
+.view-section {
+  display: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1), transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.view-section.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 2. Retinal AI Laser Scan Effect */
+.retina-scan-laser {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--color-cyan), #38BDF8, transparent);
+  box-shadow: 0 0 14px var(--color-cyan), 0 0 4px #FFFFFF;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.retina-viewport.scanning .retina-scan-laser {
+  opacity: 1;
+  animation: retinalLaserScan 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes retinalLaserScan {
+  0% { top: 0%; }
+  100% { top: 98%; }
+}
+
+/* 3. Subtle Card Elevation on Hover */
+.elevate-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.elevate-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 4. Pulse Indicator for High-Risk Alerts */
+.pulse-badge {
+  position: relative;
+}
+
+.pulse-badge::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0.5;
+  animation: pulseAura 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  z-index: -1;
+}
+
+@keyframes pulseAura {
+  0% { transform: scale(1); opacity: 0.6; }
+  70% { transform: scale(1.15); opacity: 0; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* 5. Smooth Spinner */
+.spin-loader {
+  animation: spinCircle 0.85s linear infinite;
+}
+
+@keyframes spinCircle {
+  100% { transform: rotate(360deg); }
+}
+
+/* 6. Neural Radar Glow during AI Inference */
+.ai-analyzing-glow {
+  position: relative;
+}
+
+.ai-analyzing-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563EB, #06B6D4, #3B82F6);
+  background-size: 200% 200%;
+  animation: rainbowBorder 3s linear infinite;
+  z-index: -1;
+  opacity: 0.8;
+}
+
+@keyframes rainbowBorder {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 7. Shimmer Loading Placeholders */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmerMove 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmerMove {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 8. Fade In Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 250ms ease forwards;
+}
+
+/* 9. Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

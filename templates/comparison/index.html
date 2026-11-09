@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Longitudinal Eye Comparison – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-layout-split text-info me-2"></i> Longitudinal Prior vs Current Comparison{% endblock %}
+
+{% block content %}
+<!-- Medical Clinical Validation Notice -->
+<div class="medical-alert mb-4">
+    <i class="bi bi-shield-exclamation text-info fs-4"></i>
+    <div>
+        <strong>Longitudinal Protocol Rule:</strong> Comparisons strictly enforce <strong>identical eye anatomical laterality</strong> (Right Eye OD vs Right Eye OD, or Left Eye OS vs Left Eye OS) of the <strong>same patient</strong>. Variations in illumination, camera angle, and pupil dilation can impact machine classifications. A shift in AI staging does not confirm biological disease progression or regression.
+    </div>
+</div>
+
+<!-- Selector Form -->
+<div class="rg-card mb-4">
+    <div class="rg-card-header">
+        <h5 class="rg-card-title"><i class="bi bi-sliders text-cyan"></i> Select Examination Pair for Comparison</h5>
+        <span class="badge bg-info-subtle text-info border border-info">Same-Patient, Same-Eye Validation</span>
+    </div>
+
+    <form method="GET" action="{{ url_for('comparison.index') }}">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label text-secondary small fw-semibold">1. Select Patient *</label>
+                <select name="patient_id" id="patientSelect" class="form-select rg-form-control" onchange="this.form.submit()" required>
+                    <option value="">-- Choose Patient --</option>
+                    {% for p in patients %}
+                    <option value="{{ p.id }}" {% if selected_patient and selected_patient.id == p.id %}selected{% endif %}>
+                        {{ p.patient_uid }} – {{ p.name }} ({{ p.images.count() }} scans)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if selected_patient %}
+            <div class="col-md-3">
+                <label class="form-label text-secondary small fw-semibold">2. Baseline / Prior Scan (T1) *</label>
+                <select name="previous_id" class="form-select rg-form-control" required>
+                    <option value="">-- Select Prior Scan --</option>
+                    {% for s in patient_screenings %}
+                    <option value="{{ s.id }}" {% if previous_screening and previous_screening.id == s.id %}selected{% endif %}>
+                        #{{ s.id }} ({{ s.image.captured_date or s.created_at.strftime('%Y-%m-%d') }}) – {{ 'OD' if s.image.eye_laterality == 'right' else 'OS' }} [{{ s.predicted_class_label.split('(')[0] }}]
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label text-secondary small fw-semibold">3. Follow-Up / Current Scan (T2) *</label>
+                <select name="current_id" class="form-select rg-form-control" required>
+                    <option value="">-- Select Follow-up Scan --</option>
+                    {% for s in patient_screenings %}
+                    <option value="{{ s.id }}" {% if current_screening and current_screening.id == s.id %}selected{% endif %}>
+                        #{{ s.id }} ({{ s.image.captured_date or s.created_at.strftime('%Y-%m-%d') }}) – {{ 'OD' if s.image.eye_laterality == 'right' else 'OS' }} [{{ s.predicted_class_label.split('(')[0] }}]
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-rg-primary w-100">
+                    <i class="bi bi-arrow-repeat me-1"></i> Compare
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Comparison Outcome Workspace -->
+{% if comparison_outcome %}
+<div class="row g-4 mb-4">
+    <!-- Longitudinal Verdict Card -->
+    <div class="col-12">
+        <div class="rg-card p-3 border-{{ 'danger' if 'worsening' in comparison_outcome.status else ('success' if 'improvement' in comparison_outcome.status else ('warning' if 'Inconclusive' in comparison_outcome.status else 'info')) }}">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon {{ 'rose' if 'worsening' in comparison_outcome.status else ('emerald' if 'improvement' in comparison_outcome.status else ('cyan' if 'No apparent change' in comparison_outcome.status else 'blue')) }}">
+                        {% if 'worsening' in comparison_outcome.status %}
+                        <i class="bi bi-graph-up-arrow"></i>
+                        {% elif 'improvement' in comparison_outcome.status %}
+                        <i class="bi bi-graph-down-arrow"></i>
+                        {% elif 'Inconclusive' in comparison_outcome.status %}
+                        <i class="bi bi-question-circle"></i>
+                        {% else %}
+                        <i class="bi bi-dash-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="small text-muted text-uppercase fw-bold letter-spacing-1">Longitudinal Evaluation Verdict</div>
+                        <h4 class="fw-bold mb-0 text-white">{{ comparison_outcome.status }}</h4>
+                        <div class="small text-secondary mt-1">
+                            Baseline: <strong class="text-white">{{ previous_screening.predicted_class_label }}</strong> 
+                            &rarr; Follow-up: <strong class="text-white">{{ current_screening.predicted_class_label }}</strong>
+                            (Confidence Delta: <span class="font-mono text-info">{{ comparison_outcome.conf_delta_str }}</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('reports.generate_comparison', prev_id=previous_screening.id, curr_id=current_screening.id) }}" class="btn btn-rg-primary btn-sm">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generate Comparison PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dual Synchronized Viewer Controls -->
+    <div class="col-12">
+        <div class="rg-card">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-zoom-in text-cyan"></i> Synchronized Side-by-Side Fundus & Grad-CAM Inspection</h5>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-outline-info btn-sm" id="toggleHeatmapBtn">
+                        <i class="bi bi-fire me-1"></i> View Grad-CAM Attention
+                    </button>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary" id="zoomOutBtn" title="Zoom Out"><i class="bi bi-dash"></i></button>
+                        <span class="btn btn-outline-secondary disabled font-mono text-light" id="currentZoomLevel">100%</span>
+                        <button type="button" class="btn btn-outline-secondary" id="zoomInBtn" title="Zoom In"><i class="bi bi-plus"></i></button>
+                        <button type="button" class="btn btn-outline-secondary" id="resetZoomBtn" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 text-center">
+                <!-- Left: Previous Screening -->
+                <div class="col-md-6 border-end border-secondary">
+                    <div class="p-2 mb-2 rounded bg-dark border border-secondary d-flex justify-content-between align-items-center">
+                        <span class="badge bg-secondary-subtle text-light fw-bold">BASELINE SCAN (T1)</span>
+                        <span class="small text-secondary">{{ previous_screening.image.captured_date or previous_screening.created_at.strftime('%Y-%m-%d') }}</span>
+                    </div>
+
+                    {% set prev_raw = url_for('static', filename=previous_screening.image.filepath.replace('static/', '')) if previous_screening.image.filepath.startswith('static/') else url_for('uploaded_file', filename=previous_screening.image.filepath) %}
+                    {% set prev_heat = url_for('static', filename=previous_screening.gradcam_overlay_path.replace('static/', '')) if previous_screening.gradcam_overlay_path.startswith('static/') else url_for('uploaded_file', filename=previous_screening.gradcam_overlay_path) %}
+
+                    <div class="overflow-hidden position-relative rounded" style="max-height: 380px; background: #000; border: 1px solid var(--rg-border);">
+                        <img id="prevRetinaImg" src="{{ prev_raw }}" data-original="{{ prev_raw }}" data-overlay="{{ prev_heat }}" 
+                             alt="Previous Fundus" class="img-fluid transition-all" style="transition: transform 0.2s ease;">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                        <span class="dr-badge dr-badge-{{ previous_screening.predicted_class_id }}">
+                            {{ previous_screening.predicted_class_label.split('(')[0] }}
+                        </span>
+                        <span class="font-mono text-info small fw-bold">Confidence: {{ (previous_screening.confidence_score * 100)|round(1) }}%</span>
+                    </div>
+                </div>
+
+                <!-- Right: Current Screening -->
+                <div class="col-md-6">
+                    <div class="p-2 mb-2 rounded bg-dark border border-secondary d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info-subtle text-info fw-bold">CURRENT SCAN (T2)</span>
+                        <span class="small text-secondary">{{ current_screening.image.captured_date or current_screening.created_at.strftime('%Y-%m-%d') }}</span>
+                    </div>
+
+                    {% set curr_raw = url_for('static', filename=current_screening.image.filepath.replace('static/', '')) if current_screening.image.filepath.startswith('static/') else url_for('uploaded_file', filename=current_screening.image.filepath) %}
+                    {% set curr_heat = url_for('static', filename=current_screening.gradcam_overlay_path.replace('static/', '')) if current_screening.gradcam_overlay_path.startswith('static/') else url_for('uploaded_file', filename=current_screening.gradcam_overlay_path) %}
+
+                    <div class="overflow-hidden position-relative rounded" style="max-height: 380px; background: #000; border: 1px solid var(--rg-border);">
+                        <img id="currRetinaImg" src="{{ curr_raw }}" data-original="{{ curr_raw }}" data-overlay="{{ curr_heat }}" 
+                             alt="Current Fundus" class="img-fluid transition-all" style="transition: transform 0.2s ease;">
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                        <span class="dr-badge dr-badge-{{ current_screening.predicted_class_id }}">
+                            {{ current_screening.predicted_class_label.split('(')[0] }}
+                        </span>
+                        <span class="font-mono text-info small fw-bold">Confidence: {{ (current_screening.confidence_score * 100)|round(1) }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Differential Analysis & Feature Explanation -->
+    <div class="col-lg-6">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-cpu-fill text-cyan"></i> AI Longitudinal Difference Synthesis</h5>
+            </div>
+            <div class="p-3 rounded mb-3" style="background: var(--rg-bg-input); border-left: 3px solid var(--rg-accent-cyan);">
+                <p class="text-white small mb-2"><strong>Differential Evaluation:</strong></p>
+                <p class="text-secondary small mb-0">{{ comparison_outcome.explanation }}</p>
+            </div>
+
+            <div class="border-top border-secondary pt-3">
+                <h6 class="fw-bold text-white small mb-2"><i class="bi bi-lightbulb-fill text-warning me-1"></i> Clinical Factors Considered</h6>
+                <ul class="text-secondary small ps-3 mb-0">
+                    <li>Examined Eye Laterality: <strong>{{ 'Right Eye (OD)' if previous_screening.image.eye_laterality == 'right' else 'Left Eye (OS)' }}</strong> strictly verified.</li>
+                    <li>Baseline Image Quality: <strong>{{ previous_screening.image.quality_assessment }}</strong> (Score: {{ previous_screening.image.quality_score }}%).</li>
+                    <li>Follow-up Image Quality: <strong>{{ current_screening.image.quality_assessment }}</strong> (Score: {{ current_screening.image.quality_score }}%).</li>
+                    <li>Time elapsed between examinations: <strong>{{ comparison_outcome.days_between }} days</strong>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparative Probability Distribution Chart -->
+    <div class="col-lg-6">
+        <div class="rg-card h-100">
+            <div class="rg-card-header">
+                <h5 class="rg-card-title"><i class="bi bi-bar-chart-line text-cyan"></i> 5-Class Probability Shift (T1 vs T2)</h5>
+            </div>
+            <div style="height: 250px; position: relative;">
+                <canvas id="comparisonProbChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% elif selected_patient %}
+<div class="rg-card text-center py-5">
+    <i class="bi bi-layout-split text-info fs-1 mb-3"></i>
+    <h5 class="text-white fw-bold">Select Two Screenings to Compare</h5>
+    <p class="text-secondary small" style="max-width: 500px; margin: 0 auto;">
+        Choose a baseline examination (T1) and a follow-up examination (T2) for patient <strong>{{ selected_patient.name }}</strong> above to compute longitudinal differential metrics.
+    </p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/comparison.js') }}"></script>
+{% if comparison_outcome %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('comparisonProbChart').getContext('2d');
+    const prevProbs = {{ previous_screening.probabilities_dict() | tojson }};
+    const currProbs = {{ current_screening.probabilities_dict() | tojson }};
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative'],
+            datasets: [
+                {
+                    label: 'Baseline (T1)',
+                    data: [prevProbs['No DR'], prevProbs['Mild'], prevProbs['Moderate'], prevProbs['Severe'], prevProbs['Proliferative']],
+                    backgroundColor: 'rgba(100, 116, 139, 0.6)',
+                    borderColor: '#94a3b8',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Current (T2)',
+                    data: [currProbs['No DR'], currProbs['Mild'], currProbs['Moderate'], currProbs['Severe'], currProbs['Proliferative']],
+                    backgroundColor: 'rgba(6, 182, 212, 0.7)',
+                    borderColor: '#06b6d4',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { color: '#94a3b8' }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: (v) => v + '%'
+                    },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#f8fafc' }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

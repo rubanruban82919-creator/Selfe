@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Patients Registry – RetinaGuard AI{% endblock %}
+{% block page_title %}<i class="bi bi-people-fill text-info me-2"></i> Patients Registry{% endblock %}
+
+{% block content %}
+<div class="rg-card mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <!-- Search Bar -->
+        <form method="GET" action="{{ url_for('patients.index') }}" class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 450px;">
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-info"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" class="form-control rg-form-control" placeholder="Search by Patient Name or ID..." value="{{ request.args.get('q', '') }}">
+            </div>
+            <button type="submit" class="btn btn-rg-secondary btn-sm">Filter</button>
+            {% if request.args.get('q') %}
+            <a href="{{ url_for('patients.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+            {% endif %}
+        </form>
+
+        <!-- Add Patient Button -->
+        <a href="{{ url_for('patients.create') }}" class="btn btn-rg-primary">
+            <i class="bi bi-person-plus-fill me-1"></i> Register New Patient
+        </a>
+    </div>
+</div>
+
+<!-- Patients List Table -->
+<div class="rg-card">
+    <div class="table-responsive">
+        <table class="rg-table">
+            <thead>
+                <tr>
+                    <th>Patient UID</th>
+                    <th>Name</th>
+                    <th>Age / Gender</th>
+                    <th>Diabetes History</th>
+                    <th>Scans</th>
+                    <th>Latest DR Grade</th>
+                    <th>Registered</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in patients %}
+                <tr>
+                    <td><span class="font-mono text-info fw-semibold">{{ p.patient_uid }}</span></td>
+                    <td>
+                        <a href="{{ url_for('patients.detail', patient_id=p.id) }}" class="text-white text-decoration-none fw-semibold">
+                            {{ p.name }}
+                        </a>
+                    </td>
+                    <td class="text-secondary">{{ p.age }} yrs • {{ p.gender }}</td>
+                    <td class="text-secondary small">
+                        <span class="text-light fw-medium">{{ p.diabetes_type }}</span>
+                        {% if p.diabetes_duration_years %}
+                        ({{ p.diabetes_duration_years }} yrs)
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-dark border border-secondary text-info font-mono">
+                            {{ p.images.count() }} scans
+                        </span>
+                    </td>
+                    <td>
+                        {% set latest_scr = p.latest_screening %}
+                        {% if latest_scr %}
+                        <span class="dr-badge dr-badge-{{ latest_scr.predicted_class_id }}">
+                            {{ latest_scr.predicted_class_label.split('(')[0].strip() }}
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-muted">No Screenings</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-secondary small">{{ p.created_at.strftime('%b %d, %Y') }}</td>
+                    <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{{ url_for('patients.detail', patient_id=p.id) }}" class="btn btn-outline-info" title="View Patient Profile & Timeline">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('patients.edit', patient_id=p.id) }}" class="btn btn-outline-secondary" title="Edit Patient Details">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePatientModal{{ p.id }}" title="Delete Patient Record">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+
+                        <!-- Delete Confirmation Modal -->
+                        <div class="modal fade" id="deletePatientModal{{ p.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="background: var(--rg-bg-secondary); border: 1px solid var(--rg-border); color: var(--rg-text-primary); text-align: left;">
+                                    <div class="modal-header border-secondary">
+                                        <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Confirm Patient Deletion</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Are you sure you want to permanently delete patient <strong>{{ p.name }}</strong> (<code>{{ p.patient_uid }}</code>)?</p>
+                                        <div class="p-2.5 rounded bg-dark border border-danger-subtle text-danger small">
+                                            <i class="bi bi-shield-x me-1"></i> Warning: This action will permanently purge all associated retinal fundus photographs, AI Grad-CAM heatmaps, comparison records, and generated clinical PDF reports.
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-secondary">
+                                        <button type="button" class="btn btn-rg-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                        <form method="POST" action="{{ url_for('patients.delete', patient_id=p.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Yes, Purge Record</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-5">
+                        <i class="bi bi-person-x fs-2 d-block mb-2"></i>
+                        No patient records matching query.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

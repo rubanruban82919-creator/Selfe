@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetinaGuard AI – Clinical Diabetic Retinopathy Intelligence Platform</title>
+  <meta name="description" content="Enterprise-grade AI healthcare SaaS platform for longitudinal diabetic retinopathy surveillance, lesion segmentation, and comparative progression analytics.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/cyber-clinical.css">
+</head>
+<body>
+
+<div class="auth-gate" id="authGate" hidden>
+  <div class="auth-card med-card">
+    <p class="report-kicker">RetinaGuard AI</p>
+    <h1>Clinical access</h1>
+    <p id="authMessage" class="engine-note"></p>
+    <div id="setupPanel" hidden>
+      <h2>Create the Super Admin</h2>
+      <p>This screen appears only once. The account you create here is the owner and is stored as a hashed password in the local database. There is no default password.</p>
+      <form id="setupForm">
+        <div class="form-group"><label class="form-label">Full name</label><input class="form-control" id="setupName" required></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="setupEmail" type="email" required autocomplete="username"></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-control" id="setupPassword" type="password" required minlength="12" autocomplete="new-password"></div>
+        <div class="form-group"><label class="form-label">Confirm password</label><input class="form-control" id="setupConfirm" type="password" required minlength="12" autocomplete="new-password"></div>
+        <button class="btn btn-primary" type="submit">Create Super Admin</button>
+      </form>
+    </div>
+    <div id="loginPanel" hidden>
+      <h2>Sign in</h2>
+      <p>Super Admin, doctor, and staff accounts use the same sign-in. What you can change depends on the role stored for the account.</p>
+      <form id="loginForm">
+        <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="loginEmail" type="email" required autocomplete="username"></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-control" id="loginPassword" type="password" required autocomplete="current-password"></div>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="app-container" id="clinicalApp">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  
+  <!-- ========================================================================
+       1. SIDEBAR NAVIGATION
+       ======================================================================== -->
+  <aside class="app-sidebar" id="appSidebar">
+    <!-- Brand Header -->
+    <div class="sidebar-header">
+      <a href="#dashboard" class="brand-wrapper" data-route="dashboard">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="40" stroke="#FFFFFF" stroke-width="5" stroke-dasharray="190 20"/>
+            <circle cx="50" cy="50" r="16" stroke="#FFFFFF" stroke-width="3.5"/>
+            <circle cx="50" cy="50" r="7" fill="#06B6D4"/>
+            <line x1="50" y1="14" x2="50" y2="24" stroke="#06B6D4" stroke-width="3" stroke-linecap="round"/>
+            <line x1="50" y1="76" x2="50" y2="86" stroke="#06B6D4" stroke-width="3" stroke-linecap="round"/>
+            <line x1="14" y1="50" x2="24" y2="50" stroke="#06B6D4" stroke-width="3" stroke-linecap="round"/>
+            <line x1="76" y1="50" x2="86" y2="50" stroke="#06B6D4" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">
+            RetinaGuard <span class="brand-badge">AI</span>
+          </div>
+          <span class="brand-tagline">Clinical Ophthalmology</span>
+        </div>
+      </a>
+      <button class="sidebar-collapse-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Navigation Menu Items -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Clinical workspace</div>
+
+      <a href="#dashboard" class="nav-link active" data-route="dashboard">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <span class="nav-text">Dashboard</span>
+      </a>
+
+      <a href="#patients" class="nav-link" data-route="patients">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-text">Patients</span>
+        <span class="nav-badge" id="navPatientCount">0</span>
+      </a>
+
+      <button type="button" class="nav-link" data-modal="addPatientModal" data-permission="patients.write">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        <span class="nav-text">Add Patient</span>
+      </button>
+
+      <a href="#detection" class="nav-link" data-route="detection" data-permission="detection.run">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+        <span class="nav-text">AI Detection</span>
+      </a>
+
+      <a href="#comparison" class="nav-link" data-route="comparison">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 21v-4"/><path d="m9 8 3-3 3 3"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/></svg>
+        <span class="nav-text">Scan Comparison</span>
+      </a>
+
+      <a href="#history" class="nav-link" data-route="history">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        <span class="nav-text">Scan History</span>
+      </a>
+
+      <a href="#profile" class="nav-link" data-route="profile">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-text">Patient Profile</span>
+      </a>
+
+      <div class="nav-section-title">Clinical intelligence</div>
+
+      <a href="#analytics" class="nav-link" data-route="analytics">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        <span class="nav-text">Analytics</span>
+      </a>
+
+      <a href="#reports" class="nav-link" data-route="reports">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+        <span class="nav-text">Reports</span>
+      </a>
+
+      <a href="#predictions" class="nav-link" data-route="predictions" data-permission="scans.read">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+        <span class="nav-text">AI Predictions</span>
+      </a>
+
+      <div class="nav-section-title" data-permission="users.manage">Administration</div>
+
+      <a href="#admin" class="nav-link" data-route="admin" data-permission="users.manage">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+        <span class="nav-text">Admin Dashboard</span>
+      </a>
+
+      <a href="#users" class="nav-link" data-route="users" data-permission="users.manage">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-text">Users and roles</span>
+      </a>
+
+      <a href="#audit" class="nav-link" data-route="audit" data-permission="audit.read">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span class="nav-text">Audit log</span>
+      </a>
+
+      <a href="#settings" class="nav-link" data-route="settings">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="nav-text">Settings</span>
+      </a>
+
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user-pill">
+        <div class="sidebar-user-avatar">—</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Signed in</div>
+          <div class="sidebar-user-role"></div>
+        </div>
+      </div>
+      <a href="#" class="nav-link" id="sidebarLogoutBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="nav-text">Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       MAIN APP SHELL
+       ======================================================================== -->
+  <main class="app-main">
+    
+    <!-- TOPBAR -->
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button type="button" class="mobile-nav-btn" id="mobileNavBtn" aria-label="Open navigation">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="page-title-group">
+          <h1 id="pageHeaderTitle">Clinical Dashboard</h1>
+          <p id="pageHeaderSubtitle">Longitudinal Diabetic Retinopathy Surveillance & AI Decision Support</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Live Global Search -->
+        <div class="topbar-search">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="globalSearchInput" placeholder="Search patient name or ID" autocomplete="off">
+          <div class="search-results" id="searchResults" hidden></div>
+        </div>
+
+        <!-- Notification Bell Icon with Dropdown -->
+        <div style="position: relative;">
+          <button class="topbar-action-btn" id="notifBtn" title="Clinical Notifications">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span class="notification-badge-dot"></span>
+          </button>
+
+          <!-- Notification Dropdown Popover -->
+          <div class="notification-popover" id="notificationPopover">
+            <div class="popover-header">
+              <h4 id="notificationHeading" style="font-size: 0.9rem; font-weight: 700; color: var(--cc-text, #F4F8FF);">Registry alerts</h4>
+              <span class="badge badge-stage-1" style="font-size: 0.7rem;">Stored scans</span>
+            </div>
+            <div class="popover-list" id="notificationList"></div>
+          </div>
+        </div>
+
+        <!-- User Profile Pill -->
+        <div class="topbar-user" id="topbarProfile" role="button" tabindex="0">
+          <div class="topbar-avatar">—</div>
+          <div class="topbar-user-meta">
+            <span class="topbar-user-name"></span>
+            <span class="topbar-user-status">
+              <span class="status-dot green"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="content-wrapper">
+
+      <!-- ====================================================================
+           VIEW 1: DASHBOARD
+           ==================================================================== -->
+      <section id="view-dashboard" class="view-section active">
+        
+        <!-- Welcome Banner Card -->
+        <div class="med-card welcome-banner" style="color: #F4F8FF; margin-bottom: 24px; padding: 28px 32px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span class="badge" style="background: rgba(0, 245, 212, 0.12); color: #00F5D4; border: 1px solid rgba(0, 245, 212, 0.35); text-transform: uppercase;">
+                  Local classifier ready
+                </span>
+              </div>
+              <h2 id="welcomeHeading" style="color: #F4F8FF; font-size: 1.65rem; margin-bottom: 6px;">Welcome back</h2>
+              <p id="welcomeRole" class="welcome-role"></p>
+              <p id="welcomeSummary" style="color: #94A3B8; max-width: 680px; font-size: 0.9rem;"></p>
+            </div>
+            <div class="welcome-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-cyan" data-route="detection" data-permission="detection.run">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+                New Retinal Scan
+              </button>
+              <button class="btn btn-secondary" data-route="comparison">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 21v-4"/><path d="m9 8 3-3 3 3"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/></svg>
+                Compare Scans
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-label">Total patients</span>
+              <div class="stat-icon-wrapper blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="kpiPatients">0</div>
+            <div class="stat-trend">Stored in the server registry</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-label">Total scans</span>
+              <div class="stat-icon-wrapper cyan">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="kpiScans">0</div>
+            <div class="stat-trend">Stored fundus examinations</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-label">Improved cases</span>
+              <div class="stat-icon-wrapper green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="kpiImproved">0</div>
+            <div class="stat-trend">Lower grade than prior same-eye scan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-label">Stable cases</span>
+              <div class="stat-icon-wrapper blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="kpiStable">0</div>
+            <div class="stat-trend">No grade change on latest pair</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-card-label">Worsened cases</span>
+              <div class="stat-icon-wrapper red">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="kpiWorsened">0</div>
+            <div class="stat-trend">Higher grade than prior same-eye scan</div>
+          </div>
+        </div>
+
+        <!-- Charts Row: Disease Distribution & Screening Volume -->
+        <div class="grid-12" style="margin-bottom: 24px;">
+          <!-- Severity Distribution Donut -->
+          <div class="med-card col-7">
+            <div class="med-card-header">
+              <div>
+                <h3 class="med-card-title">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10h-10z"/></svg>
+                  Disease Severity Distribution (ICDR Scale)
+                </h3>
+                <p class="med-card-subtitle">Active patient cohort stratified across 5 clinical stages</p>
+              </div>
+              <span class="badge" id="severityCohortBadge" style="background: var(--color-soft-blue); color: var(--color-royal-blue);">N = 0</span>
+            </div>
+            <div id="severityDonutContainer" style="min-height: 220px;"></div>
+          </div>
+
+          <!-- Monthly Screening Bar Chart -->
+          <div class="med-card col-5">
+            <div class="med-card-header">
+              <div>
+                <h3 class="med-card-title">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                  Patient progression
+                </h3>
+                <p class="med-card-subtitle">Latest same-eye comparison for each patient</p>
+              </div>
+            </div>
+            <div id="dashboardProgressionContainer"></div>
+          </div>
+        </div>
+
+        <div class="med-card" style="margin-bottom: 24px;">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">Scan history statistics</h3>
+              <p class="med-card-subtitle">Examinations counted from stored scan dates</p>
+            </div>
+          </div>
+          <div id="dashboardVolumeContainer" style="min-height: 180px;"></div>
+        </div>
+
+        <!-- Two Column: Recent Scans Table & Activity Timeline -->
+        <div class="grid-12">
+          <!-- Recent Scans Table -->
+          <div class="med-card col-8">
+            <div class="med-card-header">
+              <div>
+                <h3 class="med-card-title">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Recent Patient Scans & Inference
+                </h3>
+                <p class="med-card-subtitle">Latest retinal fundus captures and automated AI grades</p>
+              </div>
+              <a href="#patients" class="btn btn-outline btn-sm" data-route="patients">View All Patients</a>
+            </div>
+
+            <div class="table-container">
+              <table class="med-table">
+                <thead>
+                  <tr>
+                    <th>Patient Name & ID</th>
+                    <th>Eye (OD/OS)</th>
+                    <th>DR Severity Stage</th>
+                    <th>AI Confidence</th>
+                    <th>Scan Date</th>
+                    <th style="text-align: right;">Longitudinal Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardRecentScansTbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Activity Timeline -->
+          <div class="med-card col-4">
+            <div class="med-card-header">
+              <div>
+                <h3 class="med-card-title">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Recent Clinical Activity
+                </h3>
+                <p class="med-card-subtitle">Latest stored examinations and same-eye status</p>
+              </div>
+            </div>
+            <div id="recentActivityFeed"></div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ====================================================================
+           VIEW 2: AI DETECTION PAGE
+           ==================================================================== -->
+      <section id="view-detection" class="view-section">
+        
+        <div class="grid-12">
+          <!-- Left Column: Upload & Parameters -->
+          <div class="col-6">
+            <div class="med-card" style="margin-bottom: 24px;">
+              <div class="med-card-header">
+                <div>
+                  <h3 class="med-card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Retinal Fundus Image Acquisition
+                  </h3>
+                  <p class="med-card-subtitle">Upload digital color fundus photograph or select benchmark case</p>
+                </div>
+              </div>
+
+              <!-- Upload Drag & Drop Zone -->
+              <div class="retina-upload-zone" id="retinaDropzone">
+                <input type="file" id="retinaFileInput" accept="image/*" style="display: none;">
+                <div class="upload-icon-circle">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <h4 style="font-size: 1.05rem; margin-bottom: 6px; color: var(--color-deep-navy);">
+                  Drag & Drop Retinal Image Here, or <span style="color: var(--color-royal-blue); text-decoration: underline;">Browse Files</span>
+                </h4>
+                <p style="font-size: 0.8rem; color: var(--slate-500); margin-bottom: 12px;">
+                  Accepts image files in this browser. DICOM and a trained model are not connected.
+                </p>
+
+                <!-- Quick Benchmark Sample Pills -->
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--slate-400); text-transform: uppercase; margin-top: 14px; letter-spacing: 0.05em;">
+                  Or click a clinical benchmark case to test:
+                </div>
+                <div class="sample-retina-strip">
+                  <div class="sample-thumbnail-pill" data-img="assets/images/samples/retina-stage0.svg" data-stage="0">
+                    <img src="assets/images/samples/retina-stage0.svg" class="sample-mini-img">
+                    <span style="font-size: 0.78rem; font-weight: 700;">Normal (Stage 0)</span>
+                  </div>
+                  <div class="sample-thumbnail-pill" data-img="assets/images/samples/retina-stage1.svg" data-stage="1">
+                    <img src="assets/images/samples/retina-stage1.svg" class="sample-mini-img">
+                    <span style="font-size: 0.78rem; font-weight: 700;">Mild (Stage 1)</span>
+                  </div>
+                  <div class="sample-thumbnail-pill" data-img="assets/images/samples/retina-stage2.svg" data-stage="2">
+                    <img src="assets/images/samples/retina-stage2.svg" class="sample-mini-img">
+                    <span style="font-size: 0.78rem; font-weight: 700;">Moderate (Stage 2)</span>
+                  </div>
+                  <div class="sample-thumbnail-pill active" data-img="assets/images/samples/retina-stage3.svg" data-stage="3">
+                    <img src="assets/images/samples/retina-stage3.svg" class="sample-mini-img">
+                    <span style="font-size: 0.78rem; font-weight: 700;">Severe (Stage 3)</span>
+                  </div>
+                  <div class="sample-thumbnail-pill" data-img="assets/images/samples/retina-stage4.svg" data-stage="4">
+                    <img src="assets/images/samples/retina-stage4.svg" class="sample-mini-img">
+                    <span style="font-size: 0.78rem; font-weight: 700;">PDR (Stage 4)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Scan Acquisition Parameters Form -->
+              <div class="form-split" style="margin-top: 22px;">
+                <div class="form-group" style="grid-column: span 2;">
+                  <label class="form-label">Associate with Patient ID</label>
+                  <select class="form-control form-select" id="detectionPatientSelect"></select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Eye Examined</label>
+                  <div class="eye-selector" style="width: 100%; display: flex;">
+                    <button type="button" class="eye-btn eye-btn-detect active" data-eye="OD" style="flex: 1;">Right Eye (OD)</button>
+                    <button type="button" class="eye-btn eye-btn-detect" data-eye="OS" style="flex: 1;">Left Eye (OS)</button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Examination Date</label>
+                  <input type="date" class="form-control" id="detectionScanDate" value="2026-11-06">
+                </div>
+              </div>
+
+              <!-- Analyze Trigger Button -->
+              <div style="margin-top: 10px;">
+                <button class="btn btn-primary btn-lg" id="startAnalysisBtn" style="width: 100%;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+                  Analyze Retinal Fundus Scan
+                </button>
+              </div>
+
+              <!-- Progressive Clinical Inference Stepper -->
+              <div class="inference-stepper" id="analysisStepperContainer" style="display: none; margin-top: 20px;">
+                <div class="step-item" data-step="1">
+                  <div class="step-dot">1</div>
+                  <div class="step-text">Preprocessing & CLAHE Illumination Equalization</div>
+                </div>
+                <div class="step-item" data-step="2">
+                  <div class="step-dot">2</div>
+                  <div class="step-text">Optic Disc & Fovea Centralis Localization</div>
+                </div>
+                <div class="step-item" data-step="3">
+                  <div class="step-dot">3</div>
+                  <div class="step-text">Microvascular Segmentation & Lesion Extraction</div>
+                </div>
+                <div class="step-item" data-step="4">
+                  <div class="step-dot">4</div>
+                  <div class="step-text">Deep Feature Classification (EfficientNet + ResNet)</div>
+                </div>
+                <div class="step-item" data-step="5">
+                  <div class="step-dot">5</div>
+                  <div class="step-text">Generating Grad-CAM Saliency & Clinical Staging</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Right Column: Visualizer & Results Presentation -->
+          <div class="col-6">
+            <!-- Retinal Viewport -->
+            <div class="med-card" style="margin-bottom: 24px;">
+              <div class="med-card-header">
+                <div>
+                  <h3 class="med-card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    Fundus Viewport & Lesion Saliency
+                  </h3>
+                  <p class="med-card-subtitle">High-resolution fundus inspection with Grad-CAM heatmap</p>
+                </div>
+              </div>
+
+              <div class="retina-viewport" id="detectionViewport">
+                <!-- Retinal Image Preview -->
+                <img id="detectionPreviewImage" class="retina-image-element" src="assets/images/samples/retina-stage3.svg" alt="Retinal Fundus Preview">
+                <!-- Heatmap Canvas Overlay -->
+                <canvas id="detectionHeatmapCanvas" class="heatmap-overlay-canvas"></canvas>
+                <!-- Retinal Laser Scan Line -->
+                <div class="retina-scan-laser"></div>
+                <div class="analysis-progress" id="analysisProgress" hidden>
+                  <span id="analysisProgressLabel">Preparing scan</span>
+                  <div class="analysis-progress-track"><div id="analysisProgressBar"></div></div>
+                </div>
+
+                <!-- Viewport Control Toolbar -->
+                <div class="viewport-toolbar">
+                  <button class="tool-icon-btn active" id="toggleHeatmapBtn" title="Toggle AI Lesion Heatmap Overlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                  </button>
+                  <button class="tool-icon-btn" onclick="alert('Digital zoom & pan controls active.')" title="Reset Zoom">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Beautiful Result Presentation Card -->
+            <div class="med-card" id="analysisResultsContainer" style="display: none; border-color: var(--color-royal-blue);">
+              <div class="med-card-header">
+                <div>
+                  <h3 class="med-card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    AI Diagnostic Classification Report
+                  </h3>
+                  <p class="med-card-subtitle">Grade, confidence, and lesion counts from the local classifier</p>
+                  <p id="resultEngineNote" class="engine-note"></p>
+                </div>
+                <div id="resultStageBadge"></div>
+              </div>
+
+              <!-- Confidence Metric Bar -->
+              <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
+                  <span style="font-weight: 700; color: var(--color-deep-navy);">Diagnostic Confidence</span>
+                  <span id="resultConfidenceVal" style="font-weight: 800; color: var(--color-royal-blue); font-family: var(--font-mono);">98.7%</span>
+                </div>
+                <div style="width: 100%; height: 8px; background: var(--slate-100); border-radius: var(--radius-full); overflow: hidden;">
+                  <div id="resultConfidenceBar" style="width: 98.7%; height: 100%; background: linear-gradient(90deg, var(--color-royal-blue), var(--color-cyan)); border-radius: var(--radius-full); transition: width 0.6s ease;"></div>
+                </div>
+              </div>
+
+              <!-- Lesion Segmentation Metrics Grid -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+                <div class="med-card" style="padding: 12px; background: var(--slate-50); border: 1px solid var(--slate-100);">
+                  <div class="metric-cell-label">Microaneurysms</div>
+                  <div class="metric-cell-value" id="metricMicroaneurysms">38</div>
+                </div>
+                <div class="med-card" style="padding: 12px; background: var(--slate-50); border: 1px solid var(--slate-100);">
+                  <div class="metric-cell-label">Blot Hemorrhages</div>
+                  <div class="metric-cell-value" id="metricHemorrhages">24</div>
+                </div>
+                <div class="med-card" style="padding: 12px; background: var(--slate-50); border: 1px solid var(--slate-100);">
+                  <div class="metric-cell-label">Hard Exudates</div>
+                  <div class="metric-cell-value" id="metricExudates">12</div>
+                </div>
+                <div class="med-card" style="padding: 12px; background: var(--slate-50); border: 1px solid var(--slate-100);">
+                  <div class="metric-cell-label">Cotton Wool Spots</div>
+                  <div class="metric-cell-value" id="metricCottonWool">4</div>
+                </div>
+                <div class="med-card" style="padding: 12px; background: var(--slate-50); border: 1px solid var(--slate-100); grid-column: span 2;">
+                  <div class="metric-cell-label">Neovascularization</div>
+                  <div class="metric-cell-value" id="metricNeovascular" style="color: var(--stage-4-rose);">None Detected</div>
+                </div>
+              </div>
+
+              <!-- Clinical Findings & Actions -->
+              <div style="background: var(--color-soft-blue); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; border: 1px solid var(--color-soft-blue-darker);">
+                <div style="margin-bottom: 10px;">
+                  <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--color-royal-blue);">Key Saliency Findings</span>
+                  <p id="resultFindingsText" style="font-size: 0.85rem; color: var(--color-deep-navy); font-weight: 600; margin-top: 2px;">
+                    >20 intraretinal blot hemorrhages in all quadrants (4-2-1 rule satisfied), multiple microaneurysms, and localized cotton wool spots.
+                  </p>
+                </div>
+                <div>
+                  <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--color-royal-blue);">Recommended Action Plan</span>
+                  <p id="resultActionPlanText" style="font-size: 0.85rem; color: var(--color-deep-navy); font-weight: 600; margin-top: 2px;">
+                    Urgent referral to vitreoretinal specialist within 2–4 weeks. Evaluate for early panretinal photocoagulation (PRP).
+                  </p>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 14px; font-size: 0.78rem; color: var(--slate-600);">
+                  <div><strong>Risk Tier:</strong> <span id="resultRiskTier">High Risk</span></div>
+                  <div><strong>ICD-10 Code:</strong> <span id="resultIcdCode" class="font-mono">E11.349</span></div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-secondary" id="saveScanToPatientBtn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  Save to Patient Record
+                </button>
+                <button class="btn btn-primary" id="quickCompareBtn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 21v-4"/><path d="m9 8 3-3 3 3"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/></svg>
+                  Compare with Prior Scan
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ====================================================================
+           VIEW 3: SCAN COMPARISON PAGE (THE MOST IMPORTANT PAGE)
+           ==================================================================== -->
+      <section id="view-comparison" class="view-section">
+        
+        <!-- Comparison Header Controls & Patient Selector -->
+        <div class="med-card" style="margin-bottom: 24px; padding: 20px 24px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div class="brand-logo-icon" style="background: linear-gradient(135deg, var(--color-royal-blue), var(--color-cyan));">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 21v-4"/><path d="m9 8 3-3 3 3"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/></svg>
+              </div>
+              <div>
+                <h2 style="font-size: 1.35rem; color: var(--color-deep-navy);">Longitudinal Retinal Scan Comparison</h2>
+                <p style="font-size: 0.825rem; color: var(--slate-500);">Analyze microvascular changes, progression trajectories, and lesion delta</p>
+              </div>
+            </div>
+
+            <!-- Trajectory Case Selector & View Toggle -->
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+              <div>
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Patient</label>
+                <select class="form-control form-select" id="comparisonPatientSelect" style="min-width: 240px; font-weight: 600;"></select>
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Eye</label>
+                <select class="form-control form-select" id="comparisonEyeSelect" style="min-width: 160px; font-weight: 600;"></select>
+                <p id="compEyeNote" class="eye-note"></p>
+              </div>
+
+              <!-- View Switcher -->
+              <div>
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Display Mode</label>
+                <div class="eye-selector">
+                  <button type="button" class="eye-btn active" id="toggleSideBySideBtn">Side-by-Side Dual</button>
+                  <button type="button" class="eye-btn" id="toggleCurtainBtn">Curtain Split Slider</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROGRESSION HERO BANNER: TEXT + ICON LABELS (NOT COLOR ALONE) -->
+        <div class="comparison-hero-banner" id="comparisonHeroBanner">
+          <div class="comparison-patient-meta">
+            <div class="patient-badge-avatar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <h3 id="compPatientName" style="color: #FFFFFF; font-size: 1.4rem; margin-bottom: 2px;">Robert Chen</h3>
+              <div id="compPatientId" style="font-size: 0.85rem; color: var(--color-cyan); font-weight: 600;">DR-2026-8941 • 58y / Male • Type 2 Diabetes Mellitus</div>
+              <div id="compPatientHbA1c" style="font-size: 0.8rem; color: var(--slate-300);">HbA1c: 9.2% • Duration: 14 years</div>
+            </div>
+          </div>
+
+          <!-- Progression Indicator (Improved, Stable, Worsened, First-Time Scan) -->
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+            <div id="compProgressionBadge" class="comparison-progression-pill worsened">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>DISEASE PROGRESSION DETECTED (WORSENED)</span>
+            </div>
+            <div style="font-size: 0.825rem; color: #FFFFFF; font-weight: 600; display: flex; align-items: center; gap: 12px;">
+              <span>Delta: <strong id="compSeverityDiffText" style="color: #FCA5A5;">+2 Severity Grade(s) Progression</strong></span>
+              <span>•</span>
+              <span id="compTimeElapsedText">12 months elapsed between scans</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparative Clinical Finding Alert Box -->
+        <div class="med-card comparison-summary" style="margin-bottom: 24px; border-left: 4px solid var(--cc-teal, #00F5D4); padding: 18px 24px;">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--color-soft-blue); color: var(--color-royal-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div style="flex: 1;">
+              <h4 style="font-size: 0.95rem; color: var(--color-deep-navy); margin-bottom: 4px;">Longitudinal Progression Analysis</h4>
+              <p id="compProgressionSummary" style="font-size: 0.875rem; color: var(--slate-700); line-height: 1.45; margin-bottom: 8px;">
+                Significant microvascular deterioration detected. Patient advanced from Grade 1 (Mild NPDR) to Grade 3 (Severe NPDR) over a 12-month interval. Increased intraretinal blot hemorrhages and microvascular leakage observed.
+              </p>
+              <div id="compClinicalActionAlert" style="font-size: 0.85rem; font-weight: 700; color: #DC2626;">
+                URGENT VITREORETINAL REFERRAL: Recommend comprehensive fluorescein angiography and panretinal photocoagulation (PRP) evaluation within 14 days.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE 1: SIDE-BY-SIDE DUAL SCAN VIEW -->
+        <div id="comparisonSideBySideWrapper" class="comparison-grid">
+          
+          <!-- PREVIOUS SCAN CARD (LEFT) -->
+          <div class="comparison-scan-card">
+            <div class="scan-card-header">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="scan-type-tag previous">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                  Previous Scan (Baseline)
+                </span>
+                <span id="prevScanDate" style="font-size: 0.85rem; font-weight: 700; color: var(--slate-700);">2025-10-14</span>
+              </div>
+              <div id="prevScanGradeBadge">
+                <span class="badge badge-stage-1">Stage 1: Mild NPDR</span>
+              </div>
+            </div>
+
+            <!-- Left Retinal Image -->
+            <div class="scan-visual-wrapper">
+              <img id="prevScanImage" src="assets/images/samples/retina-stage1.svg" alt="Previous Retinal Fundus Scan">
+              <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(16, 27, 53, 0.8); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: var(--radius-xs); color: #FFFFFF; font-size: 0.75rem; font-weight: 700;" id="prevScanEye">
+                Right Eye (OD)
+              </div>
+            </div>
+
+            <!-- Left Scan Metrics -->
+            <div class="scan-card-body">
+              <div class="scan-metric-row">
+                <div class="metric-cell">
+                  <span class="metric-cell-label">Microaneurysms</span>
+                  <span class="metric-cell-value" id="prevScanMicroaneurysms">6</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-cell-label">Hemorrhages</span>
+                  <span class="metric-cell-value" id="prevScanHemorrhages">1</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-cell-label">Hard Exudates</span>
+                  <span class="metric-cell-value" id="prevScanExudates">0</span>
+                </div>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--slate-500);">
+                <strong>Status:</strong> Isolated punctate microvascular lesions; quiescent baseline.
+              </div>
+            </div>
+          </div>
+
+          <!-- CURRENT SCAN CARD (RIGHT) -->
+          <div class="comparison-scan-card" style="border-color: var(--color-royal-blue); box-shadow: var(--shadow-md);">
+            <div class="scan-card-header" style="background: var(--color-soft-blue);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="scan-type-tag current">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                  Current Scan (Follow-Up)
+                </span>
+                <span id="currScanDate" style="font-size: 0.85rem; font-weight: 700; color: var(--color-deep-navy);">2026-10-18</span>
+              </div>
+              <div id="currScanGradeBadge">
+                <span class="badge badge-stage-3">Stage 3: Severe NPDR</span>
+              </div>
+            </div>
+
+            <!-- Right Retinal Image -->
+            <div class="scan-visual-wrapper">
+              <img id="currScanImage" src="assets/images/samples/retina-stage3.svg" alt="Current Retinal Fundus Scan">
+              <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(16, 27, 53, 0.8); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: var(--radius-xs); color: #FFFFFF; font-size: 0.75rem; font-weight: 700;" id="currScanEye">
+                Right Eye (OD)
+              </div>
+            </div>
+
+            <!-- Right Scan Metrics -->
+            <div class="scan-card-body">
+              <div class="scan-metric-row">
+                <div class="metric-cell">
+                  <span class="metric-cell-label">Microaneurysms</span>
+                  <span class="metric-cell-value" id="currScanMicroaneurysms" style="color: #EA580C;">38 (+32)</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-cell-label">Hemorrhages</span>
+                  <span class="metric-cell-value" id="currScanHemorrhages" style="color: #EA580C;">24 (+23)</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-cell-label">Hard Exudates</span>
+                  <span class="metric-cell-value" id="currScanExudates" style="color: #EA580C;">12 (+12)</span>
+                </div>
+              </div>
+              <div style="font-size: 0.78rem; color: var(--slate-500);">
+                <strong>Status:</strong> Severe 4-quadrant hemorrhages and venous dilation observed.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- MODE 2: INTERACTIVE SPLIT CURTAIN SLIDER -->
+        <div id="comparisonCurtainWrapper" style="display: none; margin-bottom: 24px;">
+          <div class="curtain-container" id="interactiveCurtainContainer">
+            <!-- Before Image (Left Layer) -->
+            <div class="curtain-image-before">
+              <img id="curtainBeforeImage" src="assets/images/samples/retina-stage1.svg" alt="Baseline Retinal Scan">
+            </div>
+            <!-- After Image (Right Clipped Layer) -->
+            <div class="curtain-image-after">
+              <img id="curtainAfterImage" src="assets/images/samples/retina-stage3.svg" alt="Follow-up Retinal Scan">
+            </div>
+            <!-- Interactive Draggable Handle -->
+            <div class="curtain-slider-handle">
+              <div class="curtain-handle-circle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18-6-6 6-6"/><path d="m15 6 6 6-6 6"/></svg>
+              </div>
+            </div>
+            <!-- Badges inside curtain -->
+            <div class="curtain-label left">Previous Scan (Baseline)</div>
+            <div class="curtain-label right">Current Scan (Follow-Up)</div>
+          </div>
+          <p style="text-align: center; font-size: 0.8rem; color: var(--slate-500); margin-top: 10px;">
+            Drag the center divider left or right to inspect pixel-aligned microvascular progression and lesion changes.
+          </p>
+        </div>
+
+        <!-- Longitudinal Progression History Chart Card -->
+        <div class="med-card" style="margin-bottom: 24px;">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                Longitudinal Disease Progression Trajectory
+              </h3>
+              <p class="med-card-subtitle">Historical severity stage tracking across multiple consultations</p>
+            </div>
+            <button class="btn btn-primary btn-sm" id="generateReferralBtn" data-route="reports">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Generate Referral Letter
+            </button>
+          </div>
+          <div id="compTrajectoryChartContainer" style="min-height: 220px;"></div>
+        </div>
+
+      </section>
+
+
+      <!-- ====================================================================
+           VIEW 4: PATIENTS DIRECTORY
+           ==================================================================== -->
+      <section id="view-patients" class="view-section">
+        
+        <div class="med-card">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Diabetic Retinopathy Cohort Directory
+              </h3>
+              <p class="med-card-subtitle">Active surveillance registry of screened patients</p>
+            </div>
+            <button class="btn btn-primary" data-modal="addPatientModal" data-permission="patients.write">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add New Patient
+            </button>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-container">
+            <table class="med-table">
+              <thead>
+                <tr>
+                  <th>Patient Name & ID</th>
+                  <th>Age / Sex</th>
+                  <th>Diabetes Type & HbA1c</th>
+                  <th>Current DR Stage</th>
+                  <th>Progression Status</th>
+                  <th>Last Screening</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="patientsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ====================================================================
+           VIEW 5: PATIENT PROFILE PAGE
+           ==================================================================== -->
+      <section id="view-profile" class="view-section">
+        
+        <!-- Patient Overview Card -->
+        <div class="med-card" style="margin-bottom: 24px; padding: 28px 32px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div class="patient-badge-avatar" style="width: 64px; height: 64px; font-size: 1.6rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                  <h2 id="profilePatientName" style="font-size: 1.6rem; color: var(--color-deep-navy);">Robert Chen</h2>
+                  <span id="profilePatientId" class="badge" style="background: var(--color-soft-blue); color: var(--color-royal-blue); font-family: var(--font-mono); font-size: 0.8rem;">DR-2026-8941</span>
+                </div>
+                <p id="profilePatientMeta" style="font-size: 0.875rem; color: var(--slate-600);">58 years old • Male • DOB: 1968-04-12</p>
+              </div>
+            </div>
+
+            <!-- Profile Action Buttons -->
+            <div class="profile-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" id="downloadPatientReportBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Patient Report (PDF)
+              </button>
+              <button class="btn btn-primary" id="newScanForPatientBtn" data-permission="detection.run">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+                New Scan for Patient
+              </button>
+            </div>
+          </div>
+
+          <!-- Demographic Parameters Grid -->
+          <div class="profile-stat-grid" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--slate-100);">
+            <div class="metric-cell">
+              <span class="metric-cell-label">Diabetes Subtype</span>
+              <span class="metric-cell-value" id="profileDiabetesType">Type 2 Diabetes Mellitus</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-cell-label">Duration of Disease</span>
+              <span class="metric-cell-value" id="profileDiabetesDuration">14 years</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-cell-label">Recent HbA1c</span>
+              <span class="metric-cell-value" id="profileHbA1c" style="color: #DC2626;">9.2%</span>
+            </div>
+            <div class="metric-cell">
+              <span class="metric-cell-label">Visual Acuity (OD / OS)</span>
+              <span class="metric-cell-value"><span id="profileVisualAcuityOD">20/40</span> / <span id="profileVisualAcuityOS">20/25</span></span>
+            </div>
+          </div>
+
+          <div style="margin-top: 16px; padding: 12px 16px; background: var(--slate-50); border-radius: var(--radius-sm); border: 1px solid var(--slate-200); font-size: 0.825rem; color: var(--slate-700);">
+            <strong>Assigned Clinician:</strong> <span id="profileDoctor">—</span><br>
+            <strong>Clinical History & Notes:</strong> <span id="profileClinicalNotes">Poor glycemic control (HbA1c 9.2%). Reports blurred vision in Right Eye. Rapid disease progression.</span>
+          </div>
+        </div>
+
+        <!-- Longitudinal Progression Graph for this Patient -->
+        <div class="med-card" style="margin-bottom: 24px;">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                Longitudinal Disease Trajectory
+              </h3>
+              <p class="med-card-subtitle">Consultation timeline vs ICDR stage evolution</p>
+            </div>
+          </div>
+          <div id="profileTrajectoryContainer" style="min-height: 220px;"></div>
+        </div>
+
+        <!-- Retinal Scans Gallery -->
+        <div class="med-card" style="margin-bottom: 24px;">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                Retinal Fundus Image Archive
+              </h3>
+              <p class="med-card-subtitle">Longitudinal fundus photographs acquired across previous visits</p>
+            </div>
+          </div>
+          <div class="grid-3" id="profileScansGallery"></div>
+        </div>
+
+        <!-- AI Prediction History Table -->
+        <div class="med-card">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                AI Prediction History & Confidence Log
+              </h3>
+              <p class="med-card-subtitle">Verifiable algorithmic audit trail</p>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="med-table">
+              <thead>
+                <tr>
+                  <th>Scan ID</th>
+                  <th>Date</th>
+                  <th>Eye</th>
+                  <th>Assigned DR Grade</th>
+                  <th>Confidence</th>
+                  <th>Risk Tier</th>
+                </tr>
+              </thead>
+              <tbody id="profileHistoryTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ====================================================================
+           VIEW 6: CLINICAL ANALYTICS & EPIDEMIOLOGY
+           ==================================================================== -->
+      <section id="view-history" class="view-section">
+        <div class="med-card">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">Scan history</h3>
+              <p class="med-card-subtitle">Every stored retinal examination, newest first. Progression is calculated against the previous scan of the same eye.</p>
+            </div>
+          </div>
+          <div class="history-toolbar">
+            <input type="search" class="form-control" id="historySearch" placeholder="Search patient name or ID" autocomplete="off">
+            <input type="date" class="form-control" id="historyDateFrom" aria-label="From date">
+            <input type="date" class="form-control" id="historyDateTo" aria-label="To date">
+            <select class="form-control form-select" id="historySeverity" aria-label="Severity filter">
+              <option value="">All severities</option>
+              <option value="0">Stage 0 · No DR</option>
+              <option value="1">Stage 1 · Mild</option>
+              <option value="2">Stage 2 · Moderate</option>
+              <option value="3">Stage 3 · Severe</option>
+              <option value="4">Stage 4 · Proliferative</option>
+            </select>
+          </div>
+          <div class="table-container">
+            <table class="med-table">
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Eye</th>
+                  <th>Date</th>
+                  <th>Severity</th>
+                  <th>Confidence</th>
+                  <th>Versus prior same eye</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="scanHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-analytics" class="view-section">
+        
+        <div class="grid-12" style="margin-bottom: 24px;">
+          <!-- Severity Donut -->
+          <div class="med-card col-6">
+            <div class="med-card-header">
+              <div>
+                <h3 class="med-card-title">Population Retinopathy Stratification</h3>
+                <p class="med-card-subtitle">Proportion of patients across ICDR disease stages</p>
+              </div>
+            </div>
+            <div id="analyticsDonutContainer" style="min-height: 240px;"></div>
+          </div>
+
+          <!-- Screening Volume Trends -->
+          <div class="med-card col-6">
+            <div class="med-card-header">
+              <div>
+                <h3 class="med-card-title">Scans by month</h3>
+                <p class="med-card-subtitle">Counted from stored examination dates</p>
+              </div>
+            </div>
+            <div id="analyticsScreeningContainer" style="min-height: 240px;"></div>
+          </div>
+        </div>
+
+        <!-- Diagnostic Performance KPI Grid -->
+        <div class="med-card">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">What this build can measure</h3>
+              <p class="med-card-subtitle">Registry figures only. Sensitivity, specificity, and AUC are not computed here.</p>
+            </div>
+          </div>
+          <p class="model-notice">No trained model file, MySQL database, or sign-in service is connected. Image grades are produced by the demonstration routine in <code>assets/js/ai-engine.js</code>. Uploaded photos that are not the built-in samples receive a weighted random grade, so those results are not clinical predictions.</p>
+          <div class="analytics-metrics">
+            <div class="stat-card">
+              <span class="stat-card-label">Stored scans</span>
+              <div class="stat-value" id="analyticsScanCount">0</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-label">Mean stored confidence</span>
+              <div class="stat-value" id="analyticsMeanConfidence">—</div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card-label">Latest exams at stage 2 or higher</span>
+              <div class="stat-value" id="analyticsReferable">0</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ====================================================================
+           VIEW 7: DIAGNOSTIC REPORTS & REFERRAL GENERATOR
+           ==================================================================== -->
+      <section id="view-reports" class="view-section">
+        <div id="savedReports" style="max-width:900px;margin:0 auto 20px;"></div>
+        <div class="med-card report-sheet" id="clinicalReportSheet" style="max-width: 900px; margin: 0 auto; padding: 36px;">
+          <p class="report-kicker">Report loads from the selected patient record</p>
+          <div class="report-actions" style="margin-top: 30px; text-align: center;">
+            <button class="btn btn-primary btn-lg" id="printReferralReportBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+              Print / Save PDF Diagnostic Report
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ====================================================================
+           VIEW 8: SETTINGS & CONFIGURATION
+           ==================================================================== -->
+      <section id="view-admin" class="view-section">
+        <div id="adminSummary"></div>
+      </section>
+
+      <section id="view-users" class="view-section">
+        <div class="grid-12">
+          <div class="med-card col-5">
+            <div class="med-card-header"><div><h3 class="med-card-title">Create account</h3><p class="med-card-subtitle">Choose a password now. It is hashed before it is stored and is not shown again.</p></div></div>
+            <form id="createUserForm">
+              <div class="form-group"><label class="form-label">Name</label><input class="form-control" id="userName" required></div>
+              <div class="form-group"><label class="form-label">Email</label><input class="form-control" id="userEmail" type="email" required></div>
+              <div class="form-group"><label class="form-label">Role</label>
+                <select class="form-control form-select" id="userRole">
+                  <option value="doctor">Doctor</option>
+                  <option value="staff">Staff</option>
+                  <option value="super_admin">Super Admin</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Password</label><input class="form-control" id="userPassword" type="password" minlength="12" required></div>
+              <label class="form-label"><input type="checkbox" id="userActive" checked> Account active</label>
+              <div style="margin-top:16px;"><button class="btn btn-primary" type="submit">Create account</button></div>
+              <p id="userFormMessage" class="engine-note"></p>
+            </form>
+          </div>
+          <div class="med-card col-7">
+            <div class="med-card-header"><div><h3 class="med-card-title">Accounts</h3><p class="med-card-subtitle">Role changes and deactivation take effect on the next request.</p></div></div>
+            <div class="table-container">
+              <table class="med-table">
+                <thead><tr><th>Person</th><th>Role</th><th>Status</th><th></th></tr></thead>
+                <tbody id="userTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-audit" class="view-section">
+        <div class="med-card">
+          <div class="med-card-header"><div><h3 class="med-card-title">Audit log</h3><p class="med-card-subtitle">Sign-ins, record changes, and account changes recorded by the server.</p></div></div>
+          <div class="table-container">
+            <table class="med-table">
+              <thead><tr><th>When</th><th>Account</th><th>Action</th><th>Detail</th></tr></thead>
+              <tbody id="auditTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-predictions" class="view-section">
+        <div class="med-card">
+          <div class="med-card-header"><div><h3 class="med-card-title">Stored AI results</h3><p class="med-card-subtitle">Grades already saved with each scan. Nothing on this page invents a new prediction.</p></div></div>
+          <div class="table-container">
+            <table class="med-table">
+              <thead><tr><th>Patient</th><th>Date</th><th>Eye</th><th>Stage</th><th>Confidence</th><th></th></tr></thead>
+              <tbody id="predictionTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view-section">
+        
+        <div class="med-card" style="max-width: 800px; margin: 0 auto;">
+          <div class="med-card-header">
+            <div>
+              <h3 class="med-card-title">Platform & Model Parameters</h3>
+              <p class="med-card-subtitle">These fields stay in this browser tab only. There is no settings server, model threshold, or PACS connection.</p>
+            </div>
+          </div>
+
+          <form id="settingsForm">
+            <div class="form-group">
+              <label class="form-label">Healthcare Facility / Practice Name</label>
+              <input type="text" class="form-control" value="Central Ophthalmology & Vitreoretinal Medical Center">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Assigned Supervising Ophthalmologist</label>
+              <input type="text" class="form-control" id="settingsClinician" value="">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="form-label">AI Decision Confidence Cutoff</label>
+                <select class="form-control form-select">
+                  <option selected>95.0% (Clinical High Precision)</option>
+                  <option>90.0% (Screening High Sensitivity)</option>
+                  <option>98.0% (Defensive Diagnostic Rule-In)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Progression Alert Sensitivity</label>
+                <select class="form-control form-select">
+                  <option selected>Flag ≥ +1 Severity Grade Change (Standard)</option>
+                  <option>Flag Any Lesion Delta Increase (Strict)</option>
+                  <option>Flag Stage 3 and 4 Only (High-Triage)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">DICOM Server Endpoint / PACS Integration</label>
+              <input type="text" class="form-control font-mono" value="pacs.retinaguard.internal:11112/AETITLE=RETINA_AI">
+            </div>
+
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+              <button type="reset" class="btn btn-outline">Reset to Defaults</button>
+              <button type="submit" class="btn btn-primary">Save Configuration</button>
+            </div>
+          </form>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ========================================================================
+     MODAL: ADD PATIENT MODAL
+     ======================================================================== -->
+<div class="modal-backdrop" id="addPatientModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Register New Patient</h3>
+      <button class="modal-close-btn" title="Close Modal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <form id="addPatientForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Full Legal Name</label>
+          <input type="text" class="form-control" id="newPatientName" placeholder="e.g. Katherine Reynolds" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Age</label>
+            <input type="number" class="form-control" id="newPatientAge" value="54" min="1" max="120" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Biological Gender</label>
+            <select class="form-control form-select" id="newPatientGender">
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Diabetes Subtype</label>
+            <select class="form-control form-select" id="newPatientDiabetesType">
+              <option value="Type 2 Diabetes Mellitus">Type 2 Diabetes Mellitus</option>
+              <option value="Type 1 Diabetes Mellitus">Type 1 Diabetes Mellitus</option>
+              <option value="Gestational Diabetes">Gestational Diabetes</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Current HbA1c Level</label>
+            <input type="text" class="form-control" id="newPatientHbA1c" placeholder="e.g. 7.8%">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Clinical Intake Notes & Visual Complaints</label>
+          <textarea class="form-control" id="newPatientNotes" rows="3" placeholder="Document any history of diabetic macular edema, photocoagulation, or sudden visual acuity drop..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline modal-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Patient Record</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="appToast" class="app-toast" role="status" hidden></div>
+
+<div class="modal-backdrop" id="editPatientModal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit patient</h3>
+      <button class="modal-close-btn" type="button" title="Close"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <form id="editPatientForm">
+      <div class="modal-body">
+        <input type="hidden" id="editPatientId">
+        <div class="form-group"><label class="form-label">Name</label><input class="form-control" id="editPatientName" required></div>
+        <div class="form-split">
+          <div class="form-group"><label class="form-label">Age</label><input class="form-control" id="editPatientAge" type="number" min="1" max="120" required></div>
+          <div class="form-group"><label class="form-label">Gender</label>
+            <select class="form-control form-select" id="editPatientGender"><option>Female</option><option>Male</option><option>Other</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">HbA1c</label><input class="form-control" id="editPatientHbA1c"></div>
+        <div class="form-group"><label class="form-label">Clinical notes</label><textarea class="form-control" id="editPatientNotes" rows="3"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline modal-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/ai-engine.js"></script>
+<script src="assets/js/comparison.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/admin.js"></script>
+<script src="assets/js/app.js"></script>
+
+</body>
+</html>

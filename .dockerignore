@@ -1,0 +1,32 @@
+# Git and IDE
+.git
+.gitignore
+.vscode
+.idea
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Local environments
+venv/
+venv_old/
+env/
+.env
+
+# Large datasets (DO NOT bundle 9GB dataset into web image!)
+dataset/
+data/
+
+# Cache directories
+keras_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local database (container creates fresh database on first boot)
+database/*.db-journal
+
+# Documentation and temporary assets
+assets/
+tests/
