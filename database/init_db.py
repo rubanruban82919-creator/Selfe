@@ -24,6 +24,9 @@ def init_database(app: Flask):
         db.create_all()
         
         # 1. Seed Administrator and Clinician Users if not present
+        admin_pass = os.environ.get("ADMIN_PASSWORD", "Admin@12345")
+        doctor_pass = os.environ.get("CLINICIAN_PASSWORD", "Doctor@12345")
+
         admin_user = User.query.filter_by(username="admin").first()
         if not admin_user:
             admin_user = User(
@@ -33,9 +36,9 @@ def init_database(app: Flask):
                 role="admin",
                 is_active=True
             )
-            admin_user.set_password("Admin@12345")
+            admin_user.set_password(admin_pass)
             db.session.add(admin_user)
-            print(">> Created default admin: admin / Admin@12345")
+            print(">> Seeded administrator account: admin (password configured via ADMIN_PASSWORD)")
         
         doctor_user = User.query.filter_by(username="dr_vance").first()
         if not doctor_user:
@@ -46,9 +49,9 @@ def init_database(app: Flask):
                 role="clinician",
                 is_active=True
             )
-            doctor_user.set_password("Doctor@12345")
+            doctor_user.set_password(doctor_pass)
             db.session.add(doctor_user)
-            print(">> Created default clinician: dr_vance / Doctor@12345")
+            print(">> Seeded clinician account: dr_vance (password configured via CLINICIAN_PASSWORD)")
 
         db.session.commit()
 
